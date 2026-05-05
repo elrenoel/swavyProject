@@ -1,22 +1,40 @@
-import CuratedSection from "../components/sections/CuratedSection";
-import { useEffect, useState } from "react";
-import { getNewReleases } from "../services/spotify";
+import CuratedHeader from "../components/curated/CuratedHeader";
+import CuratedGrid from "../components/curated/CuratedGrid";
+import CreateListModal from "../components/sections/CreateListModal";
+import { useState } from "react";
+import { useLists } from "../context/ListContext";
 
 const List = () => {
-  const [releases, setReleases] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { lists, setLists } = useLists();
+  const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await getNewReleases();
-      setReleases(data);
-      setLoading(false);
-    };
+  const handleCreate = (newList) => {
+    setLists((prev) => [newList, ...prev]);
+  };
 
-    fetchData();
-  }, []);
+  return (
+    <section className="px-10 py-16">
 
-  return <CuratedSection releases={releases} loading={loading} />;
+      <CuratedHeader />
+
+      <button
+        onClick={() => setIsOpen(true)}
+        className="mb-6 px-4 py-2 bg-green-500 text-white rounded-full"
+      >
+        + Create List
+      </button>
+
+      <CuratedGrid lists={lists} />
+
+      {isOpen && (
+        <CreateListModal
+          onClose={() => setIsOpen(false)}
+          onCreate={handleCreate}
+        />
+      )}
+
+    </section>
+  );
 };
 
 export default List;

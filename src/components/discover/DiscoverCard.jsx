@@ -1,30 +1,43 @@
-const DiscoverCard = () => {
+const DiscoverCard = ({ track, rank }) => {
   return (
-    <div className="space-y-3 md:space-y-4 cursor-pointer">
-      
-      <img
-        src="https://picsum.photos/400"
-        alt="cover"
-        className=" w-full
-          h-[200px] sm:h-[240px] md:h-[300px]
-          object-cover
-          rounded-xl"
-      />
+    <div
+      className={`
+        space-y-3 cursor-pointer group relative rounded-xl
+        ${rank <= 3 ? "ring-2 ring-green-500" : ""}
+        ${rank === 1 ? "bg-yellow-500/10" : ""}
+        ${rank === 2 ? "bg-gray-400/10" : ""}
+        ${rank === 3 ? "bg-orange-500/10" : ""}
+      `}
+    >
 
-      <div className="flex justify-between items-center">
-        <h3 className="text-base sm:text-lg md:text-xl
-          font-['Newsreader']">
-          Ephemeral Echoes
-        </h3>
-
-        <span className="text-xs sm:text-sm text-gray-400">
-          2024
+      {/* 🔥 RANK BADGE */}
+      <div className="absolute top-3 left-3 z-10">
+        <span className="
+          bg-black/80 text-white text-xs px-2 py-1 rounded
+          font-semibold
+        ">
+          #{rank}
         </span>
       </div>
 
-      <p className="text-xs sm:text-sm text-gray-500">
-        Julianna Rayne
-      </p>
+      {/* IMAGE */}
+      <div className="overflow-hidden rounded-xl">
+        <img
+          src={track.album.images[0]?.url}
+          className="w-full h-[260px] object-cover group-hover:scale-105 transition"
+        />
+      </div>
+
+      {/* INFO */}
+      <div>
+        <h3 className="text-lg font-medium line-clamp-1">
+          {track.name}
+        </h3>
+
+        <p className="text-sm text-gray-500 line-clamp-1">
+          {track.artists.map(a => a.name).join(", ")}
+        </p>
+      </div>
 
     </div>
   );

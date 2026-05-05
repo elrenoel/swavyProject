@@ -1,3 +1,11 @@
 <img className="absolute top-0 left-0 w-full h-full rounded-lg shadow" />
         <img className="absolute top-2 left-2 w-full h-full rounded-lg opacity-80" />
         <img className="absolute top-4 left-4 w-full h-full rounded-lg opacity-60" />
+
+CommunityHeader.jsx
+    CommunityTabs.jsx
+    CommunityFeed.jsx
+    CommunityPost.jsx
+    CommunitySidebar.jsx
+    CommunityTopUsers.jsx
+    CommunityEditorsNote.jsx

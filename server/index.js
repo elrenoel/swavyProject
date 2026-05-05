@@ -89,6 +89,156 @@ app.get('/api/new-releases', async (req, res) => {
   }
 });
 
+app.get("/api/search", async (req, res) => {
+  const query = req.query.q;
+
+  if (!query) {
+    return res.json([]);
+  }
+
+  try {
+    // ambil token (reuse logic kamu)
+    const tokenResponse = await fetch(SPOTIFY_TOKEN_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization:
+          "Basic " +
+          Buffer.from(
+            process.env.SPOTIFY_CLIENT_ID +
+            ":" +
+            process.env.SPOTIFY_CLIENT_SECRET
+          ).toString("base64"),
+      },
+      body: "grant_type=client_credentials",
+    });
+
+    const tokenData = await tokenResponse.json();
+    const token = tokenData.access_token;
+
+    const searchResponse = await fetch(
+      `https://api.spotify.com/v1/search?q=${query}&type=track&limit=5`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await searchResponse.json();
+
+    res.json({
+      tracks: data.tracks.items,
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/album/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // 1. ambil token
+    const tokenResponse = await fetch(SPOTIFY_TOKEN_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization:
+          "Basic " +
+          Buffer.from(
+            process.env.SPOTIFY_CLIENT_ID +
+            ":" +
+            process.env.SPOTIFY_CLIENT_SECRET
+          ).toString("base64"),
+      },
+      body: "grant_type=client_credentials",
+    });
+
+    const tokenData = await tokenResponse.json();
+    const token = tokenData.access_token;
+
+    // 2. fetch album detail
+    const albumRes = await fetch(
+      `https://api.spotify.com/v1/albums/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const albumData = await albumRes.json();
+
+    if (!albumRes.ok) {
+      return res.status(500).json(albumData);
+    }
+
+    res.json(albumData);
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/discover?q=keyword
+app.get("/api/discover", async (req, res) => {
+  const query = req.query.q || "top hits 2025";
+
+  try {
+    const tokenRes = await fetch(SPOTIFY_TOKEN_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization:
+          "Basic " +
+          Buffer.from(
+            process.env.SPOTIFY_CLIENT_ID +
+            ":" +
+            process.env.SPOTIFY_CLIENT_SECRET
+          ).toString("base64"),
+      },
+      body: "grant_type=client_credentials",
+    });
+
+    const tokenData = await tokenRes.json();
+
+    if (!tokenData.access_token) {
+      return res.status(500).json({ error: "Token gagal" });
+    }
+
+    const apiRes = await fetch(
+      `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=10`,
+      {
+        headers: {
+          Authorization: `Bearer ${tokenData.access_token}`,
+        },
+      }
+    );
+
+    const data = await apiRes.json();
+
+    console.log("DISCOVER RESPONSE:", data);
+
+    if (data.error) {
+      return res.status(500).json(data);
+    }
+
+    // 🔥 WAJIB RETURN
+    return res.json({
+      tracks: data.tracks?.items || [],
+    });
+
+  } catch (err) {
+    console.error("Server error:", err);
+
+    return res.status(500).json({
+      error: err.message,
+    });
+  }
+});
+
 // Error middleware
 app.use((err, req, res, next) => {
   console.error('🔴 Unhandled Error:', err);

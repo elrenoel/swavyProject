@@ -16,3 +16,12 @@ export const getNewReleases = async () => {
     return [];
   }
 };
+
+export const getDiscover = async (query = "top hit 2025") => {
+  const res = await fetch(
+    `http://localhost:5000/api/discover?q=${query}`
+  );
+
+  const data = await res.json();
+  return data.tracks || [];
+};
