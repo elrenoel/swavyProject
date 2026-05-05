@@ -1,16 +1,22 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { useState } from 'react';
-import Navbar from './components/layouts/Navbar';
-import Home from './pages/Home';
-import Profile from './pages/Profile';
-import Footer from './components/layouts/Footer';
-import List from './pages/List';
-import Discover from './pages/Discover';
-import Community from './pages/Community';
-import AlbumDetail from './pages/AlbumDetail';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useState } from "react";
+
+// Layouts & Components
+import MainLayout from "./MainLayout";
 import EmbedPlayer from "./components/player/EmbedPlayer";
-import { ListProvider } from "./context/ListContext";// ⚠️ perbaiki juga ini
-import ListDetail from './pages/ListDetail';
+
+// Pages
+import Home from "./pages/Home";
+import Profile from "./pages/Profile";
+import List from "./pages/List";
+import ListDetail from "./pages/ListDetail";
+import Discover from "./pages/Discover";
+import Community from "./pages/Community";
+import AlbumDetail from "./pages/AlbumDetail";
+import AuthPage from "./pages/AuthPage";
+
+// Context
+import { ListProvider } from "./context/ListContext";
 import { ReviewProvider } from "./context/ReviewContext";
 
 function App() {
@@ -18,34 +24,36 @@ function App() {
 
   return (
     <BrowserRouter>
-      
-      {/* 🔥 WRAP DI SINI */}
       <ListProvider>
         <ReviewProvider>
-          <Navbar setCurrentTrack={setCurrentTrack} />
-
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/album/:id" element={<AlbumDetail />} />
-            <Route path="/discover" element={<Discover />} />
-            <Route path="/list" element={<List />} />
-            <Route
-              path="/list/:id"
-              element={<ListDetail setCurrentTrack={setCurrentTrack} />}
-            />
-            <Route path="/community" element={<Community />} />
-            <Route path="/profile" element={<Profile />} />
+            {/* Bungkus Route yang butuh Navbar & Footer dengan MainLayout */}
+            <Route element={<MainLayout setCurrentTrack={setCurrentTrack} />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/discover" element={<Discover />} />
+              <Route path="/album/:id" element={<AlbumDetail />} />
+              <Route path="/list" element={<List />} />
+              <Route
+                path="/list/:id"
+                element={<ListDetail setCurrentTrack={setCurrentTrack} />}
+              />
+              <Route path="/community" element={<Community />} />
+              <Route path="/profile" element={<Profile />} />
+            </Route>
+
+            {/* AuthPage tidak dibungkus MainLayout, jadi Navbar/Footer tidak muncul di sini */}
+            <Route path="/auth/*" element={<AuthPage />} />
           </Routes>
 
-          <Footer />
-
-          <EmbedPlayer
-            trackId={currentTrack}
-            onClose={() => setCurrentTrack(null)}
-          />
+          {/* Player Global - Tetap di sini agar tidak hilang saat pindah halaman */}
+          {currentTrack && (
+            <EmbedPlayer
+              trackId={currentTrack}
+              onClose={() => setCurrentTrack(null)}
+            />
+          )}
         </ReviewProvider>
       </ListProvider>
-
     </BrowserRouter>
   );
 }
