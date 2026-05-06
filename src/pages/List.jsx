@@ -5,16 +5,15 @@ import { useState } from "react";
 import { useLists } from "../context/ListContext";
 
 const List = () => {
-  const { lists, setLists } = useLists();
+  const { lists, createList, isLoading, error } = useLists();
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleCreate = (newList) => {
-    setLists((prev) => [newList, ...prev]);
+  const handleCreate = async ({ title, desc }) => {
+    await createList({ title, desc });
   };
 
   return (
     <section className="px-10 py-16">
-
       <CuratedHeader />
 
       <button
@@ -24,7 +23,17 @@ const List = () => {
         + Create List
       </button>
 
-      <CuratedGrid lists={lists} />
+      {error ? (
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          {error}
+        </div>
+      ) : null}
+
+      {isLoading ? (
+        <div className="text-gray-400">Loading lists...</div>
+      ) : (
+        <CuratedGrid lists={lists} />
+      )}
 
       {isOpen && (
         <CreateListModal
@@ -32,7 +41,6 @@ const List = () => {
           onCreate={handleCreate}
         />
       )}
-
     </section>
   );
 };

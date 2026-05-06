@@ -8,11 +8,10 @@ const CuratedCard = ({ list }) => {
   return (
     <div
       onClick={() => navigate(`/list/${list.id}`)}
-      className="space-y-3 md:space-y-4 cursor-pointer group">
-
+      className="space-y-3 md:space-y-4 cursor-pointer group"
+    >
       {/* IMAGE STACK */}
-      <div className="relative w-full aspect-square max-w-[200px]">
-
+      <div className="relative w-full aspect-square">
         {images[2] && (
           <img
             src={images[2].image}
@@ -44,9 +43,7 @@ const CuratedCard = ({ list }) => {
 
       {/* TEXT */}
       <div>
-        <p className="text-xs text-green-600 tracking-widest">
-          CUSTOM LIST
-        </p>
+        <p className="text-xs text-green-600 tracking-widest">CUSTOM LIST</p>
 
         <h3 className="text-base md:text-lg lg:text-xl font-['Newsreader'] mt-2 text-gray-900">
           {list.title}
@@ -56,7 +53,6 @@ const CuratedCard = ({ list }) => {
           {list.desc || "No description"} • {list.songs.length} songs
         </p>
       </div>
-
     </div>
   );
 };

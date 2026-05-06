@@ -12,14 +12,18 @@ const AddToListModal = ({ song, onClose }) => {
           {lists.map((list) => (
             <button
               key={list.id}
-              onClick={() => {
-                addSongToList(list.id, {
-                  id: song.id,
-                  title: song.title,
-                  artist: song.artist,
-                  image: song.image,
-                });
-                onClose();
+              onClick={async () => {
+                try {
+                  await addSongToList(list.id, {
+                    id: song.id,
+                    title: song.title,
+                    artist: song.artist,
+                    image: song.image,
+                  });
+                  onClose();
+                } catch (error) {
+                  alert(error?.message || "Failed to add song");
+                }
               }}
               className="block w-full text-left p-2 hover:bg-gray-100 rounded"
             >

@@ -58,6 +58,9 @@ export const login = async (req, res) => {
 
     res.status(200).json({
       message: "Login successful",
+      session: result.session,
+      access_token: result.session.access_token,
+      refresh_token: result.session.refresh_token,
     });
   } catch (error) {
     res.status(401).json({ error: error.message });

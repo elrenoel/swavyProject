@@ -8,10 +8,8 @@ const CreateListModal = ({ onClose, onCreate }) => {
     if (!title) return;
 
     onCreate({
-      id: Date.now(),
       title,
       desc,
-      songs: []
     });
 
     onClose();
@@ -19,8 +17,7 @@ const CreateListModal = ({ onClose, onCreate }) => {
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-xl w-[300px] space-y-4">
-
+      <div className="bg-white p-6 rounded-xl w-75 space-y-4">
         <h2 className="text-lg font-semibold">Create New List</h2>
 
         <input
@@ -46,7 +43,6 @@ const CreateListModal = ({ onClose, onCreate }) => {
             Create
           </button>
         </div>
-
       </div>
     </div>
   );

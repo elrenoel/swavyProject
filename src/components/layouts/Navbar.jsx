@@ -107,7 +107,8 @@ const Navbar = ({ setCurrentTrack }) => {
   return (
     <nav
       className="
-      flex items-center justify-between
+      flex items-center
+      justify-between
       px-4 md:px-10
       py-4
       bg-white border-b border-gray-100
@@ -120,7 +121,7 @@ const Navbar = ({ setCurrentTrack }) => {
       </div>
 
       {/* DESKTOP MENU */}
-      <div className="hidden md:flex gap-8 text-sm font-medium text-gray-500">
+      <div className="hidden md:flex-1 md:justify-center md:flex gap-8 text-sm font-medium text-gray-500">
         <a href="/" className="hover:text-[#1DB954]">
           Home
         </a>
@@ -184,7 +185,7 @@ const Navbar = ({ setCurrentTrack }) => {
                       className="flex items-center cursor-pointer hover:bg-gray-100 p-2 rounded-lg"
                     >
                       {/* LEFT */}
-                      <div className="flex flex-2 gap-3 items-center">
+                      <div className="flex gap-3 items-center">
                         <img
                           src={item.image}
                           className="w-10 h-10 rounded-md"

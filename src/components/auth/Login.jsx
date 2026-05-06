@@ -31,6 +31,9 @@ const Login = () => {
         method: "POST",
         body: JSON.stringify(loginData),
       });
+      if (data?.access_token) {
+        localStorage.setItem("access_token", data.access_token);
+      }
       console.log("Login success:", data);
       await refreshUser();
       navigate("/");
