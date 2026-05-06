@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AddToListModal from "../sections/AddToListModal";
+import { useAuth } from "../../context/AuthContext";
 
 const Navbar = ({ setCurrentTrack }) => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   // const [open, setOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -19,27 +21,24 @@ const Navbar = ({ setCurrentTrack }) => {
 
   const handleSearch = async (keyword) => {
     try {
-      const res = await fetch(
-        `http://localhost:5000/api/search?q=${keyword}`
-      );
+      const res = await fetch(`http://localhost:5000/api/search?q=${keyword}`);
 
       const data = await res.json();
 
       const tracks = data.tracks;
       if (!tracks) return;
 
-      const formatted = tracks.map(track => ({
+      const formatted = tracks.map((track) => ({
         id: track.id,
         title: track.name,
-        artist: track.artists.map(a => a.name).join(", "),
+        artist: track.artists.map((a) => a.name).join(", "),
         type: "SONG",
         image: track.album.images[0]?.url,
         albumId: track.album.id,
-        preview: track.preview_url
+        preview: track.preview_url,
       }));
 
       setResults(formatted);
-
     } catch (err) {
       console.error(err);
     }
@@ -76,39 +75,40 @@ const Navbar = ({ setCurrentTrack }) => {
   };
 
   useEffect(() => {
-  const handleClick = (e) => {
-    if (!e.target.closest(".search-box")) {
-      setIsSearchOpen(false);
-    }
-  };
+    const handleClick = (e) => {
+      if (!e.target.closest(".search-box")) {
+        setIsSearchOpen(false);
+      }
+    };
 
-  document.addEventListener("click", handleClick);
-  return () => document.removeEventListener("click", handleClick);
-}, []);
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, []);
 
   useEffect(() => {
-  const delay = setTimeout(() => {
-    if (query) {
-      handleSearch(query);
-      setIsSearchOpen(true);
-    } else {
-      setResults([]);
-      setIsSearchOpen(false);
-    }
-  }, 300);
+    const delay = setTimeout(() => {
+      if (query) {
+        handleSearch(query);
+        setIsSearchOpen(true);
+      } else {
+        setResults([]);
+        setIsSearchOpen(false);
+      }
+    }, 300);
 
-  return () => clearTimeout(delay);
-}, [query]);
+    return () => clearTimeout(delay);
+  }, [query]);
 
   return (
-    <nav className="
+    <nav
+      className="
       flex items-center justify-between
       px-4 md:px-10
       py-4
       bg-white border-b border-gray-100
       sticky top-0 z-50
-    ">
-
+    "
+    >
       {/* LOGO */}
       <div className="text-xl md:text-2xl font-bold tracking-tighter">
         Swavy<span className="text-[#1DB954]">.</span>
@@ -116,19 +116,27 @@ const Navbar = ({ setCurrentTrack }) => {
 
       {/* DESKTOP MENU */}
       <div className="hidden md:flex gap-8 text-sm font-medium text-gray-500">
-        <a href="/" className="hover:text-[#1DB954]">Home</a>
-        <a href="/discover" className="hover:text-[#1DB954]">Discover</a>
-        <a href="/list" className="hover:text-[#1DB954]">Lists</a>
-        <a href="/community" className="hover:text-[#1DB954]">Community</a>
-        <a href="/profile" className="hover:text-[#1DB954]">Profile</a>
+        <a href="/" className="hover:text-[#1DB954]">
+          Home
+        </a>
+        <a href="/discover" className="hover:text-[#1DB954]">
+          Discover
+        </a>
+        <a href="/list" className="hover:text-[#1DB954]">
+          Lists
+        </a>
+        <a href="/community" className="hover:text-[#1DB954]">
+          Community
+        </a>
+        <a href="/profile" className="hover:text-[#1DB954]">
+          Profile
+        </a>
       </div>
 
       {/* RIGHT SIDE */}
       <div className="flex items-center gap-3">
-
         {/* SEARCH (desktop only) */}
         <div className="relative search-box">
-
           {/* INPUT */}
           <input
             type="text"
@@ -148,16 +156,15 @@ const Navbar = ({ setCurrentTrack }) => {
 
           {/* OVERLAY */}
           {isSearchOpen && (
-            <div className="
+            <div
+              className="
                 absolute top-full right-0 mt-2
-                w-[90vw] max-w-[500px]
+                w-[90vw] max-w-125
                 bg-white rounded-xl shadow-lg
                 p-4 z-50
-              ">
-
-              <p className="text-xs text-gray-400 mb-3">
-                Search Results
-              </p>
+              "
+            >
+              <p className="text-xs text-gray-400 mb-3">Search Results</p>
 
               <div className="space-y-3">
                 {/* kalau ada hasil */}
@@ -169,17 +176,17 @@ const Navbar = ({ setCurrentTrack }) => {
                         navigate(`/album/${item.albumId}`);
                         setIsSearchOpen(false);
                       }}
-                      className="flex justify-between items-center cursor-pointer hover:bg-gray-100 p-2 rounded-lg"
+                      className="flex items-center cursor-pointer hover:bg-gray-100 p-2 rounded-lg"
                     >
-
                       {/* LEFT */}
-                      <div className="flex gap-3 items-center">
-                        <img src={item.image} className="w-10 h-10 rounded-md" />
+                      <div className="flex flex-2 gap-3 items-center">
+                        <img
+                          src={item.image}
+                          className="w-10 h-10 rounded-md"
+                        />
                         <div>
                           <p className="text-sm font-medium">{item.title}</p>
-                          <p className="text-xs text-gray-400">
-                            {item.artist}
-                          </p>
+                          <p className="text-xs text-gray-400">{item.artist}</p>
                         </div>
                       </div>
 
@@ -188,7 +195,7 @@ const Navbar = ({ setCurrentTrack }) => {
                           e.stopPropagation();
                           openModal(item); // nanti kita pakai ini
                         }}
-                        className="text-blue-500 text-xs"
+                        className="text-blue-500 text-xs flex-1"
                       >
                         + Add
                       </button>
@@ -203,12 +210,11 @@ const Navbar = ({ setCurrentTrack }) => {
                       >
                         {playingId === item.id ? "⏸" : "▶"}
                       </button>
-
                     </div>
                   ))
                 ) : (
                   /* fallback */
-                  <p className="text-sm text-gray-400 line-clamp-2 break-words">
+                  <p className="text-sm text-gray-400 line-clamp-2 wrap-break-word">
                     No results for "{query}"
                   </p>
                 )}
@@ -219,10 +225,19 @@ const Navbar = ({ setCurrentTrack }) => {
                   SEE ALL RESULTS
                 </button>
               </div>
-
             </div>
           )}
         </div>
+
+        {user ? (
+          <button
+            type="button"
+            onClick={logout}
+            className="hidden md:inline-flex items-center rounded-full border border-gray-200 px-4 py-2 text-xs font-medium text-gray-600 hover:border-gray-300 hover:text-gray-800"
+          >
+            Logout
+          </button>
+        ) : null}
 
         {/* HAMBURGER */}
         <button
@@ -235,17 +250,29 @@ const Navbar = ({ setCurrentTrack }) => {
 
       {/* MOBILE MENU */}
       {isMenuOpen && (
-        <div className="
+        <div
+          className="
           absolute top-full left-0 w-full
           bg-white border-t
           flex flex-col items-center gap-4 py-6
           md:hidden
-        ">
+        "
+        >
           <a href="/">Home</a>
           <a href="/discover">Discover</a>
           <a href="/list">Lists</a>
           <a href="/community">Community</a>
           <a href="/profile">Profile</a>
+
+          {user ? (
+            <button
+              type="button"
+              onClick={logout}
+              className="text-sm font-medium text-gray-600"
+            >
+              Logout
+            </button>
+          ) : null}
 
           <input
             type="text"

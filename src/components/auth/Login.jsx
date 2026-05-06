@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { HiOutlineMail, HiOutlineLockOpen } from "react-icons/hi";
 import { RiEyeCloseLine, RiEyeLine } from "react-icons/ri";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { apiFetch } from "../../services/api";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
@@ -13,11 +15,26 @@ const Login = () => {
 
   const handleChange = (e) => {
     setLoginData({ ...loginData, [e.target.name]: e.target.value });
+    if (errorMessage) {
+      setErrorMessage("");
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Data Login:", loginData);
+    setErrorMessage("");
+
+    try {
+      const data = await apiFetch("/auth/login", {
+        method: "POST",
+        body: JSON.stringify(loginData),
+      });
+      console.log("Login success:", data);
+      navigate("/");
+    } catch (error) {
+      console.error("Login error:", error);
+      setErrorMessage(error?.message || "Terjadi kesalahan, coba lagi.");
+    }
   };
 
   return (
@@ -101,6 +118,12 @@ const Login = () => {
               Ingat saya
             </label>
           </div>
+
+          {errorMessage ? (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+              {errorMessage}
+            </div>
+          ) : null}
 
           <button
             type="submit"

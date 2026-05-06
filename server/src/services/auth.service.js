@@ -90,3 +90,21 @@ export const signIn = async (email, password) => {
 
   return data;
 };
+
+export const getUserFromToken = async (accessToken) => {
+  const { data, error } = await supabase.auth.getUser(accessToken);
+
+  if (error) throw error;
+
+  return data.user;
+};
+
+export const refreshSession = async (refreshToken) => {
+  const { data, error } = await supabase.auth.refreshSession({
+    refresh_token: refreshToken,
+  });
+
+  if (error) throw error;
+
+  return data;
+};
