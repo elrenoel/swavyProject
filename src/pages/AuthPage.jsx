@@ -1,6 +1,7 @@
 import { Route, Routes, Navigate } from "react-router-dom"; // Import Navigate
 import Login from "../components/auth/Login";
 import Register from "../components/auth/Register";
+import OtpVerify from "../components/auth/OtpVerify";
 import NavbarAuth from "../components/layouts/NavbarAuth";
 
 const AuthPage = () => {
@@ -10,9 +11,10 @@ const AuthPage = () => {
 
       <main className="flex-1 overflow-y-auto bg-gray-100">
         <Routes>
-          <Route path="/" element={<Navigate to="login" replace />} />
+          <Route path="" element={<Navigate to="login" replace />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
+          <Route path="verify-otp" element={<OtpVerify />} />
         </Routes>
       </main>
     </div>

@@ -19,6 +19,11 @@ const Navbar = ({ setCurrentTrack }) => {
     setSelectedSong(song);
   };
 
+  const handleLogout = async () => {
+    await logout();
+    navigate("/auth/login");
+  };
+
   const handleSearch = async (keyword) => {
     try {
       const res = await fetch(`http://localhost:5000/api/search?q=${keyword}`);
@@ -232,12 +237,19 @@ const Navbar = ({ setCurrentTrack }) => {
         {user ? (
           <button
             type="button"
-            onClick={logout}
+            onClick={handleLogout}
             className="hidden md:inline-flex items-center rounded-full border border-gray-200 px-4 py-2 text-xs font-medium text-gray-600 hover:border-gray-300 hover:text-gray-800"
           >
             Logout
           </button>
-        ) : null}
+        ) : (
+          <a
+            href="/auth/login"
+            className="hidden md:inline-flex items-center rounded-full border border-gray-200 px-4 py-2 text-xs font-medium text-gray-600 hover:border-gray-300 hover:text-gray-800"
+          >
+            Sign In
+          </a>
+        )}
 
         {/* HAMBURGER */}
         <button
@@ -267,12 +279,16 @@ const Navbar = ({ setCurrentTrack }) => {
           {user ? (
             <button
               type="button"
-              onClick={logout}
+              onClick={handleLogout}
               className="text-sm font-medium text-gray-600"
             >
               Logout
             </button>
-          ) : null}
+          ) : (
+            <a href="/auth/login" className="text-sm font-medium text-gray-600">
+              Sign In
+            </a>
+          )}
 
           <input
             type="text"

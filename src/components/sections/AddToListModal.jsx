@@ -5,12 +5,11 @@ const AddToListModal = ({ song, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-xl w-[300px]">
-
+      <div className="bg-white p-6 rounded-xl w-75">
         <h2 className="mb-4 font-semibold">Add to List</h2>
 
         <div className="space-y-2">
-          {lists.map(list => (
+          {lists.map((list) => (
             <button
               key={list.id}
               onClick={() => {
@@ -18,7 +17,7 @@ const AddToListModal = ({ song, onClose }) => {
                   id: song.id,
                   title: song.title,
                   artist: song.artist,
-                  image: song.image
+                  image: song.image,
                 });
                 onClose();
               }}
@@ -28,7 +27,6 @@ const AddToListModal = ({ song, onClose }) => {
             </button>
           ))}
         </div>
-
       </div>
     </div>
   );

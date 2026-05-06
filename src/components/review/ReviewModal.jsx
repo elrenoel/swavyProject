@@ -19,7 +19,7 @@ const ReviewModal = ({ track, onClose }) => {
       content: text,
       user: "You",
       likes: 0,
-      createdAt: Date.now()
+      createdAt: Date.now(),
     });
 
     onClose();
@@ -27,13 +27,12 @@ const ReviewModal = ({ track, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-[400px]">
-
+      <div className="bg-white rounded-xl p-6 w-100">
         <h2 className="text-lg font-semibold mb-4">Write Review</h2>
 
         {/* STAR */}
         <div className="flex gap-2 mb-4">
-          {[1,2,3,4,5].map(star => (
+          {[1, 2, 3, 4, 5].map((star) => (
             <button
               key={star}
               onClick={() => setRating(star)}
@@ -62,7 +61,6 @@ const ReviewModal = ({ track, onClose }) => {
             Publish
           </button>
         </div>
-
       </div>
     </div>
   );

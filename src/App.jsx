@@ -31,6 +31,9 @@ function App() {
           <ReviewProvider>
             <Routes>
               {/* Bungkus Route yang butuh Navbar & Footer dengan MainLayout */}
+              <Route element={<MainLayout setCurrentTrack={setCurrentTrack} />}>
+                <Route path="/" element={<Home />} />
+              </Route>
               <Route
                 element={
                   <RequireAuth>
@@ -38,7 +41,6 @@ function App() {
                   </RequireAuth>
                 }
               >
-                <Route path="/" element={<Home />} />
                 <Route path="/discover" element={<Discover />} />
                 <Route path="/album/:id" element={<AlbumDetail />} />
                 <Route path="/list" element={<List />} />
