@@ -1,5 +1,14 @@
 import * as authService from "../services/auth.service.js";
 
+const AUTH_COOKIE_NAME = "access_token";
+const AUTH_REFRESH_COOKIE_NAME = "refresh_token";
+const AUTH_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+};
+
 export const register = async (req, res) => {
   try {
     const { email, password, username } = req.body;
@@ -32,13 +41,89 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
     const result = await authService.signIn(email, password);
 
+    if (!result?.session?.access_token || !result?.session?.refresh_token) {
+      return res.status(500).json({ error: "Session token missing" });
+    }
+
+    res.cookie(
+      AUTH_COOKIE_NAME,
+      result.session.access_token,
+      AUTH_COOKIE_OPTIONS,
+    );
+    res.cookie(
+      AUTH_REFRESH_COOKIE_NAME,
+      result.session.refresh_token,
+      AUTH_COOKIE_OPTIONS,
+    );
+
     res.status(200).json({
       message: "Login successful",
-      session: result.session,
     });
   } catch (error) {
     res.status(401).json({ error: error.message });
   }
+};
+
+export const refresh = async (req, res) => {
+  try {
+    const refreshToken = req.cookies?.[AUTH_REFRESH_COOKIE_NAME];
+
+    if (!refreshToken) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const result = await authService.refreshSession(refreshToken);
+
+    if (!result?.session?.access_token || !result?.session?.refresh_token) {
+      return res.status(401).json({ error: "Refresh failed" });
+    }
+
+    res.cookie(
+      AUTH_COOKIE_NAME,
+      result.session.access_token,
+      AUTH_COOKIE_OPTIONS,
+    );
+    res.cookie(
+      AUTH_REFRESH_COOKIE_NAME,
+      result.session.refresh_token,
+      AUTH_COOKIE_OPTIONS,
+    );
+
+    return res.status(200).json({ message: "Refresh successful" });
+  } catch (error) {
+    return res.status(401).json({ error: error.message });
+  }
+};
+
+export const me = async (req, res) => {
+  try {
+    const accessToken = req.cookies?.[AUTH_COOKIE_NAME];
+
+    if (!accessToken) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const user = await authService.getUserFromToken(accessToken);
+
+    return res.status(200).json({ user });
+  } catch (error) {
+    return res.status(401).json({ error: error.message });
+  }
+};
+
+export const logout = async (req, res) => {
+  res.clearCookie(AUTH_COOKIE_NAME, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  });
+  res.clearCookie(AUTH_REFRESH_COOKIE_NAME, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  });
+
+  return res.status(200).json({ message: "Logout successful" });
 };
 
 export const verifyOTP = async (req, res) => {
