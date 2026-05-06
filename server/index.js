@@ -1,79 +1,79 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import { connectDB } from "./src/config/db.js";
+import authRoutes from "./src/routes/auth.route.js";
+
+dotenv.config();
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT;
 
 // CORS Setup yang lebih ketat
 const corsOptions = {
-  origin: 'http://localhost:5173', // Port Vite default
+  origin: "http://localhost:5173", // Port Vite default
   credentials: true,
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
-// app.use(cors(corsOptions));
-// app.options('*', cors(corsOptions)); // Pre-flight
 app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-const SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token';
-const SPOTIFY_API_URL = 'https://api.spotify.com/v1/search?q=year:2026&type=album&limit=10';
-// const SPOTIFY_API_URL =
-//   'https://api.spotify.com/v1/browse/new-releases?limit=10&offset=0&country=US';
-// const SPOTIFY_API_URL = 'https://api.spotify.com/v1/search?q=pop&type=album&limit=10';
-// const SPOTIFY_API_URL = 'https://api.spotify.com/v1/browse/new-releases?limit=20';
-// const SPOTIFY_API_URL = 'https://api.spotify.com/v1/search?q=album:*&type=album&limit=10';
-// const SPOTIFY_API_URL = 'https://api.spotify.com/v1/browse/categories?limit=10';
-// const SPOTIFY_API_URL = 'https://api.spotify.com/v1/search?q=year:2024&type=album&limit=10';
+const SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token";
+const SPOTIFY_API_URL =
+  "https://api.spotify.com/v1/search?q=year:2026&type=album&limit=10";
 
-app.get('/api/new-releases', async (req, res) => {
-  console.log('\n📍 Request diterima ke /api/new-releases');
+app.get("/api/new-releases", async (req, res) => {
+  console.log("\n📍 Request diterima ke /api/new-releases");
 
   const clientId = process.env.SPOTIFY_CLIENT_ID;
   const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {
-    console.error('❌ Credentials missing!');
+    console.error("❌ Credentials missing!");
     return res.status(500).json({ error: "Kredensial Spotify hilang!" });
   }
 
   try {
     // Step 1: Token
-    console.log('1️⃣  Requesting token...');
+    console.log("1️⃣  Requesting token...");
     const tokenResponse = await fetch(SPOTIFY_TOKEN_URL, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Basic ' + Buffer.from(clientId + ':' + clientSecret).toString('base64')
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization:
+          "Basic " +
+          Buffer.from(clientId + ":" + clientSecret).toString("base64"),
       },
-      body: 'grant_type=client_credentials'
+      body: "grant_type=client_credentials",
     });
 
     if (!tokenResponse.ok) {
       const error = await tokenResponse.json();
-      console.error('❌ Token Error:', error);
+      console.error("❌ Token Error:", error);
       return res.status(401).json({ error: "Token failed", detail: error });
     }
 
     const tokenData = await tokenResponse.json();
     const token = tokenData.access_token;
-    console.log('✅ Token OK');
+    console.log("✅ Token OK");
 
     // Step 2: New Releases
-    console.log('2️⃣  Fetching releases...');
+    console.log("2️⃣  Fetching releases...");
     const releaseResponse = await fetch(SPOTIFY_API_URL, {
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     });
 
-    console.log('📊 Spotify Status:', releaseResponse.status);
+    console.log("📊 Spotify Status:", releaseResponse.status);
 
     if (!releaseResponse.ok) {
       const error = await releaseResponse.json();
-      console.error('❌ Spotify Error:', error);
+      console.error("❌ Spotify Error:", error);
       return res.status(releaseResponse.status).json({
         error: "Spotify failed",
-        detail: error
+        detail: error,
       });
     }
 
@@ -82,9 +82,8 @@ app.get('/api/new-releases', async (req, res) => {
 
     console.log(`✅ Success! Sending ${albums.length} albums`);
     res.json(albums);
-
   } catch (error) {
-    console.error('❌ Exception:', error.message);
+    console.error("❌ Exception:", error.message);
     res.status(500).json({ error: error.message });
   }
 });
@@ -106,8 +105,8 @@ app.get("/api/search", async (req, res) => {
           "Basic " +
           Buffer.from(
             process.env.SPOTIFY_CLIENT_ID +
-            ":" +
-            process.env.SPOTIFY_CLIENT_SECRET
+              ":" +
+              process.env.SPOTIFY_CLIENT_SECRET,
           ).toString("base64"),
       },
       body: "grant_type=client_credentials",
@@ -122,7 +121,7 @@ app.get("/api/search", async (req, res) => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
 
     const data = await searchResponse.json();
@@ -130,7 +129,6 @@ app.get("/api/search", async (req, res) => {
     res.json({
       tracks: data.tracks.items,
     });
-
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -149,8 +147,8 @@ app.get("/api/album/:id", async (req, res) => {
           "Basic " +
           Buffer.from(
             process.env.SPOTIFY_CLIENT_ID +
-            ":" +
-            process.env.SPOTIFY_CLIENT_SECRET
+              ":" +
+              process.env.SPOTIFY_CLIENT_SECRET,
           ).toString("base64"),
       },
       body: "grant_type=client_credentials",
@@ -160,14 +158,11 @@ app.get("/api/album/:id", async (req, res) => {
     const token = tokenData.access_token;
 
     // 2. fetch album detail
-    const albumRes = await fetch(
-      `https://api.spotify.com/v1/albums/${id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const albumRes = await fetch(`https://api.spotify.com/v1/albums/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     const albumData = await albumRes.json();
 
@@ -176,7 +171,6 @@ app.get("/api/album/:id", async (req, res) => {
     }
 
     res.json(albumData);
-
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -195,8 +189,8 @@ app.get("/api/discover", async (req, res) => {
           "Basic " +
           Buffer.from(
             process.env.SPOTIFY_CLIENT_ID +
-            ":" +
-            process.env.SPOTIFY_CLIENT_SECRET
+              ":" +
+              process.env.SPOTIFY_CLIENT_SECRET,
           ).toString("base64"),
       },
       body: "grant_type=client_credentials",
@@ -214,7 +208,7 @@ app.get("/api/discover", async (req, res) => {
         headers: {
           Authorization: `Bearer ${tokenData.access_token}`,
         },
-      }
+      },
     );
 
     const data = await apiRes.json();
@@ -229,7 +223,6 @@ app.get("/api/discover", async (req, res) => {
     return res.json({
       tracks: data.tracks?.items || [],
     });
-
   } catch (err) {
     console.error("Server error:", err);
 
@@ -241,11 +234,18 @@ app.get("/api/discover", async (req, res) => {
 
 // Error middleware
 app.use((err, req, res, next) => {
-  console.error('🔴 Unhandled Error:', err);
-  res.status(500).json({ error: 'Server error' });
+  console.error("🔴 Unhandled Error:", err);
+  res.status(500).json({ error: "Server error" });
 });
+
+app.use("/api/auth", authRoutes);
+
+// connectDB().then(() => {
+//   app.listen(PORT, () => {
+//     console.log(`🚀 Server di http://localhost:${PORT}`);
+//   });
+// });
 
 app.listen(PORT, () => {
   console.log(`🚀 Server di http://localhost:${PORT}`);
-  console.log(`✅ CORS enabled untuk localhost:5173`);
 });
