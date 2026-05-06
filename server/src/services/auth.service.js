@@ -13,8 +13,8 @@ export const signUp = async (email, password, username) => {
     email,
     password,
     options: {
-      // Kita simpan username di metadata agar tidak hilang saat proses verifikasi
-      data: { username },
+      // Simpan username + email di metadata untuk kebutuhan verifikasi
+      data: { username, email },
     },
   });
 

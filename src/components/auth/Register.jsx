@@ -31,7 +31,8 @@ const Register = () => {
         body: JSON.stringify(formData),
       });
       console.log("Register success:", data);
-      navigate("../login");
+      sessionStorage.setItem("pendingOtpEmail", formData.email);
+      navigate("../verify-otp");
     } catch (error) {
       console.error("Register error:", error);
       setErrorMessage(error?.message || "Terjadi kesalahan, coba lagi.");
@@ -59,7 +60,7 @@ const Register = () => {
                 type="text"
                 name="username"
                 required
-                className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-3 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-3 focus:border-[#1DB954] focus:outline-none focus:ring-1 focus:ring-[#1DB954]"
                 placeholder="Masukkan username"
                 onChange={handleChange}
               />
@@ -79,7 +80,7 @@ const Register = () => {
                 type="email"
                 name="email"
                 required
-                className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-3 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-3 focus:border-[#1DB954] focus:outline-none focus:ring-1 focus:ring-[#1DB954]"
                 placeholder="nama@email.com"
                 onChange={handleChange}
               />
@@ -96,7 +97,7 @@ const Register = () => {
                 type={showPassword ? "text" : "password"}
                 name="password"
                 required
-                className="w-full rounded-lg border border-gray-300 py-2.5 pl-3 pr-10 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 py-2.5 pl-3 pr-10 focus:border-[#1DB954] focus:outline-none focus:ring-1 focus:ring-[#1DB954]"
                 placeholder="••••••••"
                 onChange={handleChange}
               />
@@ -122,7 +123,7 @@ const Register = () => {
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-blue-600 py-3 font-semibold text-white transition duration-200 hover:bg-blue-700 active:scale-95"
+            className="w-full rounded-lg bg-[#1DB954] py-3 font-semibold text-white transition duration-200 hover:bg-[#1DB345] active:scale-95"
           >
             Register
           </button>
@@ -132,7 +133,7 @@ const Register = () => {
           Sudah punya akun?{" "}
           <a
             onClick={() => navigate("../login")}
-            className="text-blue-600 hover:underline"
+            className="text-[#1DB954] font-semibold hover:underline"
           >
             Login
           </a>

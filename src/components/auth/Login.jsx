@@ -3,6 +3,7 @@ import { HiOutlineMail, HiOutlineLockOpen } from "react-icons/hi";
 import { RiEyeCloseLine, RiEyeLine } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -12,6 +13,7 @@ const Login = () => {
     password: "",
   });
   const navigate = useNavigate();
+  const { refreshUser } = useAuth();
 
   const handleChange = (e) => {
     setLoginData({ ...loginData, [e.target.name]: e.target.value });
@@ -30,6 +32,7 @@ const Login = () => {
         body: JSON.stringify(loginData),
       });
       console.log("Login success:", data);
+      await refreshUser();
       navigate("/");
     } catch (error) {
       console.error("Login error:", error);
