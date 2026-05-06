@@ -1,15 +1,8 @@
-// Kita memanggil server lokal Express.js kita
-const BACKEND_URL = 'http://localhost:5000/api/new-releases';
+import { apiFetch } from "./api";
 
 export const getNewReleases = async () => {
   try {
-    const response = await fetch(BACKEND_URL);
-
-    if (!response.ok) {
-      throw new Error(`Gagal memanggil Backend. Status: ${response.status}`);
-    }
-
-    const data = await response.json();
+    const data = await apiFetch("/new-releases");
     return data;
   } catch (error) {
     console.error("Error pada Front-End:", error);
@@ -18,10 +11,11 @@ export const getNewReleases = async () => {
 };
 
 export const getDiscover = async (query = "top hit 2025") => {
-  const res = await fetch(
-    `http://localhost:5000/api/discover?q=${query}`
-  );
-
-  const data = await res.json();
-  return data.tracks || [];
+  try {
+    const data = await apiFetch(`/discover?q=${encodeURIComponent(query)}`);
+    return data.tracks || [];
+  } catch (error) {
+    console.error("Error pada Front-End:", error);
+    return [];
+  }
 };

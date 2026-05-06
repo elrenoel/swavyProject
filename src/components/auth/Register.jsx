@@ -2,9 +2,11 @@ import { useState } from "react";
 import { HiOutlineMail, HiOutlineUser } from "react-icons/hi";
 import { RiEyeCloseLine, RiEyeLine } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
+import { apiFetch } from "../../services/api";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -14,11 +16,26 @@ const Register = () => {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (errorMessage) {
+      setErrorMessage("");
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Data Registrasi:", formData);
+    setErrorMessage("");
+
+    try {
+      const data = await apiFetch("/auth/register", {
+        method: "POST",
+        body: JSON.stringify(formData),
+      });
+      console.log("Register success:", data);
+      navigate("../login");
+    } catch (error) {
+      console.error("Register error:", error);
+      setErrorMessage(error?.message || "Terjadi kesalahan, coba lagi.");
+    }
   };
 
   return (
@@ -96,6 +113,12 @@ const Register = () => {
               </button>
             </div>
           </div>
+
+          {errorMessage ? (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+              {errorMessage}
+            </div>
+          ) : null}
 
           <button
             type="submit"
