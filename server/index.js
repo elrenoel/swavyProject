@@ -6,6 +6,7 @@ import corsOptions from "./src/config/cors.js";
 import authRoutes from "./src/routes/auth.route.js";
 import spotifyRoutes from "./src/routes/spotify.route.js";
 import listRoutes from "./src/routes/list.route.js";
+import reviewRoutes from "./src/routes/review.route.js";
 import errorHandler from "./src/middlewares/errorHandler.js";
 
 dotenv.config();
@@ -19,6 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth", authRoutes);
 app.use("/api", spotifyRoutes);
 app.use("/api/lists", listRoutes);
+app.use("/api/reviews", reviewRoutes);
 app.use(errorHandler);
 
 app.listen(PORT, () => {

@@ -13,6 +13,7 @@ import ListDetail from "./pages/ListDetail";
 import Discover from "./pages/Discover";
 import Community from "./pages/Community";
 import AlbumDetail from "./pages/AlbumDetail";
+import TrackDetail from "./pages/TrackDetail";
 import AuthPage from "./pages/AuthPage";
 import RequireAuth from "./components/auth/RequireAuth";
 
@@ -43,6 +44,7 @@ function App() {
               >
                 <Route path="/discover" element={<Discover />} />
                 <Route path="/album/:id" element={<AlbumDetail />} />
+                <Route path="/track/:id" element={<TrackDetail />} />
                 <Route path="/list" element={<List />} />
                 <Route
                   path="/list/:id"

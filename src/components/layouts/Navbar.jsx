@@ -5,7 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 
 const Navbar = ({ setCurrentTrack }) => {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState({ albums: [], tracks: [] });
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   // const [open, setOpen] = useState(false);
@@ -30,20 +30,31 @@ const Navbar = ({ setCurrentTrack }) => {
 
       const data = await res.json();
 
-      const tracks = data.tracks;
-      if (!tracks) return;
+      const albums = Array.isArray(data.albums) ? data.albums : [];
+      const tracks = Array.isArray(data.tracks) ? data.tracks : [];
 
-      const formatted = tracks.map((track) => ({
+      const formattedAlbums = albums.map((album) => ({
+        id: album.id,
+        title: album.name,
+        artist: album.artists.map((a) => a.name).join(", "),
+        type: "ALBUM",
+        image: album.images[0]?.url,
+        albumType: album.album_type,
+      }));
+
+      const formattedTracks = tracks.map((track) => ({
         id: track.id,
         title: track.name,
         artist: track.artists.map((a) => a.name).join(", "),
         type: "SONG",
         image: track.album.images[0]?.url,
         albumId: track.album.id,
+        albumName: track.album.name,
+        albumType: track.album.album_type,
         preview: track.preview_url,
       }));
 
-      setResults(formatted);
+      setResults({ albums: formattedAlbums, tracks: formattedTracks });
     } catch (err) {
       console.error(err);
     }
@@ -96,7 +107,7 @@ const Navbar = ({ setCurrentTrack }) => {
         handleSearch(query);
         setIsSearchOpen(true);
       } else {
-        setResults([]);
+        setResults({ albums: [], tracks: [] });
         setIsSearchOpen(false);
       }
     }, 300);
@@ -174,50 +185,80 @@ const Navbar = ({ setCurrentTrack }) => {
 
               <div className="space-y-3">
                 {/* kalau ada hasil */}
-                {results.length > 0 ? (
-                  results.slice(0, 4).map((item) => (
-                    <div
-                      key={item.id}
-                      onClick={() => {
-                        navigate(`/album/${item.albumId}`);
-                        setIsSearchOpen(false);
-                      }}
-                      className="flex items-center cursor-pointer hover:bg-gray-100 p-2 rounded-lg"
-                    >
-                      {/* LEFT */}
-                      <div className="flex gap-3 items-center">
-                        <img
-                          src={item.image}
-                          className="w-10 h-10 rounded-md"
-                        />
-                        <div>
-                          <p className="text-sm font-medium">{item.title}</p>
-                          <p className="text-xs text-gray-400">{item.artist}</p>
+                {results.albums.length + results.tracks.length > 0 ? (
+                  <>
+                    {results.albums.slice(0, 3).map((item) => (
+                      <div
+                        key={item.id}
+                        onClick={() => {
+                          navigate(`/album/${item.id}`);
+                          setIsSearchOpen(false);
+                        }}
+                        className="flex items-center cursor-pointer hover:bg-gray-100 p-2 rounded-lg"
+                      >
+                        <div className="flex gap-3 items-center">
+                          <img
+                            src={item.image}
+                            className="w-10 h-10 rounded-md"
+                          />
+                          <div>
+                            <p className="text-sm font-medium">{item.title}</p>
+                            <p className="text-xs text-gray-400">
+                              {item.artist}
+                            </p>
+                          </div>
                         </div>
+
+                        <span className="text-[10px] text-gray-400 flex-1 text-right">
+                          ALBUM
+                        </span>
                       </div>
+                    ))}
 
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openModal(item); // nanti kita pakai ini
+                    {results.tracks.slice(0, 4).map((item) => (
+                      <div
+                        key={item.id}
+                        onClick={() => {
+                          navigate(`/track/${item.id}`);
+                          setIsSearchOpen(false);
                         }}
-                        className="text-blue-500 text-xs flex-1"
+                        className="flex items-center cursor-pointer hover:bg-gray-100 p-2 rounded-lg"
                       >
-                        + Add
-                      </button>
+                        <div className="flex gap-3 items-center">
+                          <img
+                            src={item.image}
+                            className="w-10 h-10 rounded-md"
+                          />
+                          <div>
+                            <p className="text-sm font-medium">{item.title}</p>
+                            <p className="text-xs text-gray-400">
+                              {item.artist}
+                            </p>
+                          </div>
+                        </div>
 
-                      {/* RIGHT (PLAY BUTTON) */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation(); // 🔥 penting biar ga navigate
-                          setCurrentTrack(item.id);
-                        }}
-                        className="text-green-600 text-xs"
-                      >
-                        {playingId === item.id ? "⏸" : "▶"}
-                      </button>
-                    </div>
-                  ))
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openModal(item);
+                          }}
+                          className="text-blue-500 text-xs flex-1"
+                        >
+                          + Add
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCurrentTrack(item.id);
+                          }}
+                          className="text-green-600 text-xs"
+                        >
+                          {playingId === item.id ? "⏸" : "▶"}
+                        </button>
+                      </div>
+                    ))}
+                  </>
                 ) : (
                   /* fallback */
                   <p className="text-sm text-gray-400 line-clamp-2 wrap-break-word">

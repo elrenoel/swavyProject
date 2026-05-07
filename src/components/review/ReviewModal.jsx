@@ -1,28 +1,44 @@
 import { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 import { useReviews } from "../../context/ReviewContext";
 
 const ReviewModal = ({ track, onClose }) => {
-  const { addReview } = useReviews();
+  const { user } = useAuth();
+  const { createReview } = useReviews();
   const [rating, setRating] = useState(0);
   const [text, setText] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = () => {
-    if (!rating) return alert("Rating wajib");
+  const handleSubmit = async () => {
+    if (!user) {
+      alert("Harus login untuk review");
+      return;
+    }
 
-    addReview({
-      id: Date.now(),
-      trackId: track.id,
-      title: track.title,
-      artist: track.artist,
-      image: track.image,
-      rating,
-      content: text,
-      user: "You",
-      likes: 0,
-      createdAt: Date.now(),
-    });
+    if (!rating) {
+      alert("Rating wajib");
+      return;
+    }
 
-    onClose();
+    setIsSubmitting(true);
+    try {
+      await createReview({
+        track_id: track.id,
+        album_id: track.albumId || null,
+        album_name: track.albumName || null,
+        album_type: track.albumType || null,
+        title: track.title,
+        artist: track.artist,
+        image_url: track.image,
+        rating,
+        content: text,
+      });
+      onClose();
+    } catch (error) {
+      alert(error?.message || "Gagal membuat review");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -53,12 +69,15 @@ const ReviewModal = ({ track, onClose }) => {
 
         {/* ACTION */}
         <div className="flex justify-between">
-          <button onClick={onClose}>Cancel</button>
+          <button onClick={onClose} disabled={isSubmitting}>
+            Cancel
+          </button>
           <button
             onClick={handleSubmit}
-            className="bg-green-500 text-white px-4 py-2 rounded"
+            className="bg-green-500 text-white px-4 py-2 rounded disabled:opacity-60"
+            disabled={isSubmitting}
           >
-            Publish
+            {isSubmitting ? "Publishing..." : "Publish"}
           </button>
         </div>
       </div>

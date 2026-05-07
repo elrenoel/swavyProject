@@ -74,13 +74,13 @@ export const searchTracks = async (req, res) => {
   const query = req.query.q;
 
   if (!query) {
-    return res.json([]);
+    return res.json({ albums: [], tracks: [] });
   }
 
   try {
     const token = await getSpotifyToken();
     const searchResponse = await fetch(
-      `https://api.spotify.com/v1/search?q=${query}&type=track&limit=5`,
+      `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=album,track&limit=5`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -90,9 +90,85 @@ export const searchTracks = async (req, res) => {
 
     const data = await searchResponse.json();
 
-    return res.json({
-      tracks: data.tracks?.items || [],
+    const albums = data.albums?.items || [];
+    const tracks = data.tracks?.items || [];
+
+    const singleAlbums = albums.filter((album) => album.total_tracks === 1);
+    const multiTrackAlbums = albums.filter((album) => album.total_tracks !== 1);
+
+    let singleTracks = [];
+    if (singleAlbums.length) {
+      const singleTrackResults = await Promise.all(
+        singleAlbums.map(async (album) => {
+          try {
+            const albumRes = await fetch(
+              `https://api.spotify.com/v1/albums/${album.id}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              },
+            );
+
+            if (!albumRes.ok) {
+              return [];
+            }
+
+            const albumData = await albumRes.json();
+            const albumInfo = {
+              id: albumData.id,
+              name: albumData.name,
+              images: albumData.images,
+              album_type: albumData.album_type,
+            };
+
+            return (albumData.tracks?.items || []).map((track) => ({
+              ...track,
+              album: albumInfo,
+            }));
+          } catch (error) {
+            return [];
+          }
+        }),
+      );
+
+      singleTracks = singleTrackResults.flat();
+    }
+
+    const trackMap = new Map();
+    [...tracks, ...singleTracks].forEach((track) => {
+      if (track?.id) {
+        trackMap.set(track.id, track);
+      }
     });
+
+    return res.json({
+      albums: multiTrackAlbums,
+      tracks: Array.from(trackMap.values()),
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+export const getTrackDetail = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const token = await getSpotifyToken();
+    const trackRes = await fetch(`https://api.spotify.com/v1/tracks/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const trackData = await trackRes.json();
+
+    if (!trackRes.ok) {
+      return res.status(trackRes.status).json(trackData);
+    }
+
+    return res.json(trackData);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
