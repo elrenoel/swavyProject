@@ -123,6 +123,24 @@ export const getTrackReviews = async (req, res) => {
   }
 };
 
+export const getPopularReviews = async (req, res) => {
+  try {
+    const limit = parsePositiveInt(req.query.limit, 4);
+    const days = parsePositiveInt(req.query.days, 7);
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+
+    const { reviews } = await reviewService.getPopularReviews(supabase, {
+      limit,
+      since: since.toISOString(),
+    });
+
+    return res.status(200).json({ reviews });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 export const toggleReviewLike = async (req, res) => {
   try {
     const { id } = req.params;

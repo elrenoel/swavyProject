@@ -2,18 +2,24 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AddToListModal from "../sections/AddToListModal";
 import { useAuth } from "../../context/AuthContext";
+import { IoPauseCircleOutline, IoPlayCircleOutline } from "react-icons/io5";
 
 const Navbar = ({ setCurrentTrack }) => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState({ albums: [], tracks: [] });
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, isLoading, logout } = useAuth();
   // const [open, setOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [currentAudio, setCurrentAudio] = useState(null);
   const [playingId, setPlayingId] = useState(null);
   const [selectedSong, setSelectedSong] = useState(null);
+
+  const playInEmbed = (trackId) => {
+    setCurrentTrack(null);
+    setTimeout(() => setCurrentTrack(trackId), 0);
+  };
 
   const openModal = (song) => {
     setSelectedSong(song);
@@ -118,43 +124,25 @@ const Navbar = ({ setCurrentTrack }) => {
   return (
     <nav
       className="
-      flex items-center
+      flex flex-col md:flex-row md:items-center
       justify-between
       px-4 md:px-10
       py-4
-      bg-white border-b border-gray-100
+      bg-white
       sticky top-0 z-50
+      gap-5
     "
     >
-      {/* LOGO */}
-      <div className="text-xl md:text-2xl font-bold tracking-tighter">
-        Swavy<span className="text-[#1DB954]">.</span>
-      </div>
+      <div className="flex items-center justify-between md:justify-start gap-5 md:gap-10 flex-1">
+        {/* LOGO */}
+        <div className="text-2xl md:text-3xl font-bold tracking-tighter">
+          <a href="/">
+            Swavy<span className="text-[#1DB954]">.</span>
+          </a>
+        </div>
 
-      {/* DESKTOP MENU */}
-      <div className="hidden md:flex-1 md:justify-center md:flex gap-8 text-sm font-medium text-gray-500">
-        <a href="/" className="hover:text-[#1DB954]">
-          Home
-        </a>
-        <a href="/discover" className="hover:text-[#1DB954]">
-          Discover
-        </a>
-        <a href="/list" className="hover:text-[#1DB954]">
-          Lists
-        </a>
-        <a href="/community" className="hover:text-[#1DB954]">
-          Community
-        </a>
-        <a href="/profile" className="hover:text-[#1DB954]">
-          Profile
-        </a>
-      </div>
-
-      {/* RIGHT SIDE */}
-      <div className="flex items-center gap-3">
-        {/* SEARCH (desktop only) */}
-        <div className="relative search-box">
-          {/* INPUT */}
+        {/* SEARCH */}
+        <div className="relative search-box flex-1 hidden md:block">
           <input
             type="text"
             value={query}
@@ -163,20 +151,16 @@ const Navbar = ({ setCurrentTrack }) => {
               setQuery(value);
               setIsSearchOpen(value.length > 0);
             }}
-            placeholder="Search..."
-            className="
-              hidden md:block
-              bg-gray-50 border border-gray-200
-              text-sm rounded-full px-4 py-2 w-40
-            "
+            placeholder="Search Track Song or Album"
+            className=" bg-gray-100 text-sm rounded-full px-4 py-4 md:px-5 md:py-4 w-full outline-green-200"
           />
 
           {/* OVERLAY */}
           {isSearchOpen && (
             <div
               className="
-                absolute top-full right-0 mt-2
-                w-[90vw] max-w-125
+                absolute top-full  mt-2
+                w-full 
                 bg-white rounded-xl shadow-lg
                 p-4 z-50
               "
@@ -224,12 +208,12 @@ const Navbar = ({ setCurrentTrack }) => {
                         }}
                         className="flex items-center cursor-pointer hover:bg-gray-100 p-2 rounded-lg"
                       >
-                        <div className="flex gap-3 items-center">
+                        <div className="flex gap-3 items-center flex-2">
                           <img
                             src={item.image}
                             className="w-10 h-10 rounded-md"
                           />
-                          <div>
+                          <div className="flex flex-col flex-wrap">
                             <p className="text-sm font-medium">{item.title}</p>
                             <p className="text-xs text-gray-400">
                               {item.artist}
@@ -242,19 +226,23 @@ const Navbar = ({ setCurrentTrack }) => {
                             e.stopPropagation();
                             openModal(item);
                           }}
-                          className="text-blue-500 text-xs flex-1"
+                          className="text-blue-500 text-xs py-2 px-4 rounded-full mr-4 hover:bg-gray-300"
                         >
-                          + Add
+                          + Add to list
                         </button>
 
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            setCurrentTrack(item.id);
+                            playInEmbed(item.id);
                           }}
-                          className="text-green-600 text-xs"
+                          className="text-black p-1 hover:bg-gray-300 rounded-full"
                         >
-                          {playingId === item.id ? "⏸" : "▶"}
+                          {playingId === item.id ? (
+                            <IoPauseCircleOutline size={24} />
+                          ) : (
+                            <IoPlayCircleOutline size={24} />
+                          )}
                         </button>
                       </div>
                     ))}
@@ -276,7 +264,151 @@ const Navbar = ({ setCurrentTrack }) => {
           )}
         </div>
 
-        {user ? (
+        {/* HAMBURGER */}
+        <button
+          className="md:hidden text-xl"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
+          ☰
+        </button>
+      </div>
+
+      <div className="relative search-box block md:hidden">
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => {
+            const value = e.target.value;
+            setQuery(value);
+            setIsSearchOpen(value.length > 0);
+          }}
+          placeholder="Search Track Song or Album"
+          className=" bg-gray-100 text-sm rounded-full px-4 py-4 md:px-5 md:py-4 w-full outline-green-200"
+        />
+
+        {/* OVERLAY */}
+        {isSearchOpen && (
+          <div
+            className="
+                absolute top-full  mt-2
+                w-full 
+                bg-white rounded-xl shadow-lg
+                p-4 z-50
+              "
+          >
+            <p className="text-xs text-gray-400 mb-3">Search Results</p>
+
+            <div className="space-y-3">
+              {/* kalau ada hasil */}
+              {results.albums.length + results.tracks.length > 0 ? (
+                <>
+                  {results.albums.slice(0, 3).map((item) => (
+                    <div
+                      key={item.id}
+                      onClick={() => {
+                        navigate(`/album/${item.id}`);
+                        setIsSearchOpen(false);
+                      }}
+                      className="flex items-center cursor-pointer hover:bg-gray-100 p-2 rounded-lg"
+                    >
+                      <div className="flex gap-3 items-center">
+                        <img
+                          src={item.image}
+                          className="w-10 h-10 rounded-md"
+                        />
+                        <div>
+                          <p className="text-sm font-medium">{item.title}</p>
+                          <p className="text-xs text-gray-400">{item.artist}</p>
+                        </div>
+                      </div>
+
+                      <span className="text-[10px] text-gray-400 flex-1 text-right">
+                        ALBUM
+                      </span>
+                    </div>
+                  ))}
+
+                  {results.tracks.slice(0, 4).map((item) => (
+                    <div
+                      key={item.id}
+                      onClick={() => {
+                        navigate(`/track/${item.id}`);
+                        setIsSearchOpen(false);
+                      }}
+                      className="flex items-center cursor-pointer hover:bg-gray-100 p-2 rounded-lg"
+                    >
+                      <div className="flex gap-3 items-center flex-2">
+                        <img
+                          src={item.image}
+                          className="w-10 h-10 rounded-md"
+                        />
+                        <div className="flex flex-col flex-wrap">
+                          <p className="text-sm font-medium">{item.title}</p>
+                          <p className="text-xs text-gray-400">{item.artist}</p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openModal(item);
+                        }}
+                        className="text-blue-500 text-xs py-2 px-4 rounded-full mr-4 hover:bg-gray-300"
+                      >
+                        + Add to list
+                      </button>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          playInEmbed(item.id);
+                        }}
+                        className="text-black p-1 hover:bg-gray-300 rounded-full"
+                      >
+                        {playingId === item.id ? (
+                          <IoPauseCircleOutline size={24} />
+                        ) : (
+                          <IoPlayCircleOutline size={24} />
+                        )}
+                      </button>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                /* fallback */
+                <p className="text-sm text-gray-400 line-clamp-2 wrap-break-word">
+                  No results for "{query}"
+                </p>
+              )}
+            </div>
+
+            <div className="text-center mt-4">
+              <button className="text-xs text-green-600 tracking-widest">
+                SEE ALL RESULTS
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* RIGHT SIDE (desktop) */}
+      <div className="hidden md:flex items-center gap-5 md:flex-1">
+        <div className="md:flex-1 md:justify-center md:flex gap-10 text-[14px] font-medium text-shadow-black">
+          <a href="/discover" className="hover:text-gray-500">
+            Discover
+          </a>
+          <a href="/list" className="hover:text-gray-500">
+            Lists
+          </a>
+          <a href="/community" className="hover:text-gray-500">
+            Community
+          </a>
+          <a href="/profile" className="hover:text-gray-500">
+            Profile
+          </a>
+        </div>
+
+        {!isLoading && user ? (
           <button
             type="button"
             onClick={handleLogout}
@@ -284,22 +416,14 @@ const Navbar = ({ setCurrentTrack }) => {
           >
             Logout
           </button>
-        ) : (
+        ) : !isLoading ? (
           <a
             href="/auth/login"
-            className="hidden md:inline-flex items-center rounded-full border border-gray-200 px-4 py-2 text-xs font-medium text-gray-600 hover:border-gray-300 hover:text-gray-800"
+            className="hidden md:inline-flex items-center whitespace-nowrap rounded-full border border-gray-200 px-4 py-2 text-xs font-medium text-gray-600 hover:border-gray-300 hover:text-gray-800"
           >
             Sign In
           </a>
-        )}
-
-        {/* HAMBURGER */}
-        <button
-          className="md:hidden"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-        >
-          ☰
-        </button>
+        ) : null}
       </div>
 
       {/* MOBILE MENU */}
@@ -307,38 +431,52 @@ const Navbar = ({ setCurrentTrack }) => {
         <div
           className="
           absolute top-full left-0 w-full
-          bg-white border-t
-          flex flex-col items-center gap-4 py-6
+          bg-white
+          flex flex-col items-center py-6
           md:hidden
         "
         >
-          <a href="/">Home</a>
-          <a href="/discover">Discover</a>
-          <a href="/list">Lists</a>
-          <a href="/community">Community</a>
-          <a href="/profile">Profile</a>
+          <a className="hover:bg-gray-200 w-full py-4 text-center" href="/">
+            Home
+          </a>
+          <a
+            className="hover:bg-gray-200 w-full py-4 text-center"
+            href="/discover"
+          >
+            Discover
+          </a>
+          <a className="hover:bg-gray-200 w-full py-4 text-center" href="/list">
+            Lists
+          </a>
+          <a
+            className="hover:bg-gray-200 w-full py-4 text-center"
+            href="/community"
+          >
+            Community
+          </a>
+          <a
+            className="hover:bg-gray-200 w-full py-4 text-center"
+            href="/profile"
+          >
+            Profile
+          </a>
 
-          {user ? (
+          {!isLoading && user ? (
             <button
               type="button"
               onClick={handleLogout}
-              className="text-sm font-medium text-gray-600"
+              className="text-sm font-medium text-gray-600 mt-5"
             >
               Logout
             </button>
-          ) : (
-            <a href="/auth/login" className="text-sm font-medium text-gray-600">
+          ) : !isLoading ? (
+            <a
+              href="/auth/login"
+              className="text-sm font-medium text-gray-600 mt-5"
+            >
               Sign In
             </a>
-          )}
-
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search..."
-            className="bg-gray-50 border px-4 py-2 rounded-full w-3/4"
-          />
+          ) : null}
         </div>
       )}
 

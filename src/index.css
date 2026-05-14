@@ -12,3 +12,23 @@
 .avatar-cropper .cropper-bg {
     background-image: none;
 }
+
+.reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 500ms ease, transform 500ms ease;
+}
+
+.reveal.reveal-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}

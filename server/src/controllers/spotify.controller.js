@@ -2,6 +2,11 @@ const SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token";
 const SPOTIFY_API_URL =
   "https://api.spotify.com/v1/search?q=year:2026&type=album&limit=10";
 
+const releasesCache = {
+  data: null,
+  expiresAt: 0,
+};
+
 const getSpotifyToken = async () => {
   const clientId = process.env.SPOTIFY_CLIENT_ID;
   const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
@@ -21,11 +26,17 @@ const getSpotifyToken = async () => {
     body: "grant_type=client_credentials",
   });
 
-  const tokenData = await tokenResponse.json();
+  const tokenContentType = tokenResponse.headers.get("content-type") || "";
+  const tokenData = tokenContentType.includes("application/json")
+    ? await tokenResponse.json()
+    : await tokenResponse.text();
 
   if (!tokenResponse.ok) {
-    const detail = tokenData?.error || tokenData;
-    throw new Error(detail?.message || "Token failed");
+    const detail =
+      typeof tokenData === "object" && tokenData
+        ? tokenData.error || tokenData
+        : tokenData;
+    throw new Error(detail?.message || detail || "Token failed");
   }
 
   if (!tokenData.access_token) {
@@ -39,6 +50,10 @@ export const getNewReleases = async (req, res) => {
   console.log("\n📍 Request diterima ke /api/new-releases");
 
   try {
+    if (releasesCache.data && Date.now() < releasesCache.expiresAt) {
+      return res.json(releasesCache.data);
+    }
+
     console.log("1️⃣  Requesting token...");
     const token = await getSpotifyToken();
     console.log("✅ Token OK");
@@ -51,11 +66,17 @@ export const getNewReleases = async (req, res) => {
     console.log("📊 Spotify Status:", releaseResponse.status);
 
     if (!releaseResponse.ok) {
-      const error = await releaseResponse.json();
-      console.error("❌ Spotify Error:", error);
+      const contentType = releaseResponse.headers.get("content-type") || "";
+      const retryAfter = releaseResponse.headers.get("retry-after") || null;
+      const errorBody = contentType.includes("application/json")
+        ? await releaseResponse.json()
+        : await releaseResponse.text();
+
+      console.error("❌ Spotify Error:", errorBody);
       return res.status(releaseResponse.status).json({
         error: "Spotify failed",
-        detail: error,
+        detail: errorBody,
+        retryAfter,
       });
     }
 
@@ -63,6 +84,8 @@ export const getNewReleases = async (req, res) => {
     const albums = releaseData.albums?.items || [];
 
     console.log(`✅ Success! Sending ${albums.length} albums`);
+    releasesCache.data = albums;
+    releasesCache.expiresAt = Date.now() + 1000 * 60 * 5;
     return res.json(albums);
   } catch (error) {
     console.error("❌ Exception:", error.message);

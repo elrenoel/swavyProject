@@ -41,7 +41,7 @@ const Register = () => {
 
   return (
     <div className="flex h-full items-center justify-center bg-gray-100 p-4">
-      <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg">
+      <div className="w-full max-w-md rounded-xl bg-white p-8">
         <h2 className="mb-6 text-center text-3xl font-bold text-gray-800">
           Daftar Akun
         </h2>

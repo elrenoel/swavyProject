@@ -105,6 +105,22 @@ export const getTrackReviews = async (
   };
 };
 
+export const getPopularReviews = async (supabaseClient, { limit, since }) => {
+  const { data, error } = await supabaseClient
+    .from("reviews")
+    .select(
+      "id, user_id, username, track_id, album_id, album_name, album_type, title, artist, image_url, rating, content, likes_count, created_at, updated_at",
+    )
+    .gte("created_at", since)
+    .order("likes_count", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+
+  return { reviews: (data || []).map(mapReviewRow) };
+};
+
 export const toggleReviewLike = async (supabaseClient, reviewId, userId) => {
   const { data: review, error: reviewError } = await supabaseClient
     .from("reviews")

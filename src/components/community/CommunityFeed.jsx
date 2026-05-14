@@ -1,5 +1,6 @@
 import { useAuth } from "../../context/AuthContext";
 import { useReviews } from "../../context/ReviewContext";
+import ReviewCard from "../sections/CuratedEditorial/ReviewCard";
 
 const CommunityFeed = ({ activeTab }) => {
   const { user } = useAuth();
@@ -34,48 +35,40 @@ const CommunityFeed = ({ activeTab }) => {
 
   return (
     <div className="space-y-6 mt-4">
-      {pagedReviews.map((review) => (
+      {pagedReviews.map((review, index) => (
         <div key={review.id} className="p-4 border rounded-xl bg-white">
-          <div className="flex gap-3 items-center">
-            {review.image ? (
-              <img src={review.image} className="w-12 h-12 rounded" />
-            ) : (
-              <div className="w-12 h-12 rounded bg-gray-100" />
-            )}
-            <div>
-              <p className="font-semibold">{review.title}</p>
-              <p className="text-xs text-gray-400">{review.artist}</p>
-              {review.albumType !== "single" && review.albumName ? (
-                <p className="text-xs text-gray-400">{review.albumName}</p>
-              ) : null}
-              <p className="text-xs text-gray-400">
-                @{review.username || "anonymous"}
-              </p>
-            </div>
+          <ReviewCard
+            title={review.title}
+            artist={review.artist}
+            rating={review.rating ?? 0}
+            snippet={review.content || "No review text yet."}
+            isGray={index % 2 === 1}
+            image={review.image}
+          />
+
+          <div className="mt-3 flex items-center justify-between">
+            <p className="text-xs text-gray-400">
+              @{review.username || "anonymous"}
+            </p>
+            <button
+              onClick={async () => {
+                if (!user) {
+                  alert("Harus login untuk like");
+                  return;
+                }
+                try {
+                  await toggleReviewLike(review.id);
+                } catch (error) {
+                  alert(error?.message || "Gagal update like");
+                }
+              }}
+              className={`text-xs ${
+                review.likedByMe ? "text-green-600" : "text-gray-500"
+              }`}
+            >
+              {review.likedByMe ? "💚" : "❤️"} {review.likes}
+            </button>
           </div>
-
-          <p className="mt-2 text-green-500">{"★".repeat(review.rating)}</p>
-
-          <p className="text-sm mt-2">{review.content}</p>
-
-          <button
-            onClick={async () => {
-              if (!user) {
-                alert("Harus login untuk like");
-                return;
-              }
-              try {
-                await toggleReviewLike(review.id);
-              } catch (error) {
-                alert(error?.message || "Gagal update like");
-              }
-            }}
-            className={`text-xs mt-2 ${
-              review.likedByMe ? "text-green-600" : "text-gray-500"
-            }`}
-          >
-            {review.likedByMe ? "💚" : "❤️"} {review.likes}
-          </button>
         </div>
       ))}
 

@@ -9,13 +9,14 @@ const DiscoverCard = ({ track, rank }) => {
         ${rank === 3 ? "bg-orange-500/10" : ""}
       `}
     >
-
       {/* 🔥 RANK BADGE */}
       <div className="absolute top-3 left-3 z-10">
-        <span className="
+        <span
+          className="
           bg-black/80 text-white text-xs px-2 py-1 rounded
           font-semibold
-        ">
+        "
+        >
           #{rank}
         </span>
       </div>
@@ -24,21 +25,18 @@ const DiscoverCard = ({ track, rank }) => {
       <div className="overflow-hidden rounded-xl">
         <img
           src={track.album.images[0]?.url}
-          className="w-full h-[260px] object-cover group-hover:scale-105 transition"
+          className="w-full h-65 object-cover group-hover:scale-105 transition"
         />
       </div>
 
       {/* INFO */}
       <div>
-        <h3 className="text-lg font-medium line-clamp-1">
-          {track.name}
-        </h3>
+        <h3 className="text-lg font-medium line-clamp-1">{track.name}</h3>
 
         <p className="text-sm text-gray-500 line-clamp-1">
-          {track.artists.map(a => a.name).join(", ")}
+          {track.artists.map((a) => a.name).join(", ")}
         </p>
       </div>
-
     </div>
   );
 };

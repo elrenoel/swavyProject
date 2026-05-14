@@ -1,13 +1,12 @@
-import leftArrow from "../../../assets/images/btn-left.svg"
-import rightArrow from "../../../assets/images/btn-right.svg"
+import leftArrow from "../../../assets/images/btn-left.svg";
+import rightArrow from "../../../assets/images/btn-right.svg";
 
-const SectionHeader = () => {
+const SectionHeader = ({ onScrollLeft, onScrollRight }) => {
   return (
     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-      
       {/* LEFT */}
       <div>
-        <h2 className="font-['Liberation_Serif'] text-[30px] leading-[36px] font-normal text-[#1A1C1C]">
+        <h2 className="font-['Liberation_Serif'] text-[30px] leading-9 font-normal text-[#1A1C1C]">
           New Releases
         </h2>
 
@@ -18,15 +17,22 @@ const SectionHeader = () => {
 
       {/* RIGHT */}
       <div className="flex gap-2">
-        <button className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-100 transition">
+        <button
+          type="button"
+          onClick={onScrollLeft}
+          className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-100 transition"
+        >
           <img src={leftArrow} alt="left arrow" />
         </button>
 
-        <button className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-100 transition">
+        <button
+          type="button"
+          onClick={onScrollRight}
+          className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-100 transition"
+        >
           <img src={rightArrow} alt="right arrow" />
         </button>
       </div>
-
     </div>
   );
 };

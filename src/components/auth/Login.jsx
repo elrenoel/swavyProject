@@ -45,7 +45,7 @@ const Login = () => {
 
   return (
     <div className="flex h-full items-center justify-center bg-gray-100 p-4">
-      <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg">
+      <div className="w-full max-w-md rounded-xl bg-white p-8">
         <h2 className="mb-2 text-center text-3xl font-bold text-gray-800">
           Selamat Datang
         </h2>
@@ -133,7 +133,7 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-[#1DB954] py-3 font-semibold text-white transition duration-200 hover:bg-[#1DB345] active:scale-95 shadow-md shadow-indigo-200"
+            className="w-full rounded-lg bg-[#1DB954] py-3 font-semibold text-white transition duration-200 hover:bg-[#1DB345] active:scale-95"
           >
             Masuk
           </button>

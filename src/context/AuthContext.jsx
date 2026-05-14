@@ -42,6 +42,22 @@ export const AuthProvider = ({ children }) => {
     refreshUser();
   }, []);
 
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        refreshUser();
+      }
+    };
+
+    window.addEventListener("focus", refreshUser);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      window.removeEventListener("focus", refreshUser);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, []);
+
   const value = useMemo(
     () => ({ user, isLoading, refreshUser, logout }),
     [user, isLoading],

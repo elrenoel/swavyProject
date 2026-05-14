@@ -38,3 +38,8 @@ export const getTrackReviews = async (trackId) => {
 
   return data?.reviews || [];
 };
+
+export const getPopularReviews = async ({ limit = 4, days = 7 } = {}) => {
+  const data = await apiFetch(`/reviews/popular?limit=${limit}&days=${days}`);
+  return data?.reviews || [];
+};

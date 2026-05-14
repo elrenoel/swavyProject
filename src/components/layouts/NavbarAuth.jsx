@@ -11,7 +11,9 @@ const NavbarAuth = () => {
     >
       {/* LOGO */}
       <div className="text-xl md:text-2xl font-bold tracking-tighter">
-        Swavy<span className="text-[#1DB954]">.</span>
+        <a href="/">
+          Swavy<span className="text-[#1DB954]">.</span>
+        </a>
       </div>
     </nav>
   );
