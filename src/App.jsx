@@ -52,6 +52,7 @@ function App() {
                 />
                 <Route path="/community" element={<Community />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/profile/:username" element={<Profile />} />
               </Route>
 
               {/* AuthPage tidak dibungkus MainLayout, jadi Navbar/Footer tidak muncul di sini */}

@@ -1,16 +1,15 @@
 import ProfileStatCard from "./ProfileStatCard";
 
-const stats = [
-  { label: "REVIEWS WRITTEN", value: "1,420" },
-  { label: "FOLLOWERS", value: "8.4k" },
-  { label: "LISTS CURATED", value: "312" },
-  { label: "LISTENING HOURS", value: "12.1k" },
-];
-
-const ProfileStats = () => {
+const ProfileStats = ({ stats }) => {
+  const items = [
+    { label: "REVIEWS WRITTEN", value: stats?.reviewsCount ?? 0 },
+    { label: "FOLLOWERS", value: stats?.followersCount ?? 0 },
+    { label: "LISTS CURATED", value: stats?.listsCount ?? 0 },
+    { label: "SONGS IN LISTS", value: stats?.listSongsCount ?? 0 },
+  ];
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-      {stats.map((item, i) => (
+      {items.map((item, i) => (
         <ProfileStatCard key={i} {...item} />
       ))}
     </div>

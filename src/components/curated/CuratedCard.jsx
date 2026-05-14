@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 const CuratedCard = ({ list }) => {
   const navigate = useNavigate();
   // ambil max 3 gambar dari lagu di list
-  const images = list.songs.slice(0, 3);
+  const songs = Array.isArray(list.songs) ? list.songs : [];
+  const images = songs.slice(0, 3);
 
   return (
     <div
@@ -50,7 +51,7 @@ const CuratedCard = ({ list }) => {
         </h3>
 
         <p className="font-['Manrope'] text-xs md:text-sm text-[#3D4A3D]">
-          {list.desc || "No description"} • {list.songs.length} songs
+          {list.desc || "No description"} • {songs.length} songs
         </p>
       </div>
     </div>

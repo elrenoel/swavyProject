@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+.avatar-cropper .cropper-view-box,
+.avatar-cropper .cropper-face {
+    border-radius: 50%;
+}
+
+.avatar-cropper .cropper-crop-box {
+    border-radius: 50%;
+}
+
+.avatar-cropper .cropper-bg {
+    background-image: none;
+}
