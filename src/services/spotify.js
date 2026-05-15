@@ -39,3 +39,15 @@ export const getDiscover = async (query = "top hit 2025") => {
   }
 };
 
+export const getTrack = async (id) => {
+  return await apiFetch(`/track/${id}`);
+};
+
+export const getAlbum = async (id) => {
+  return await apiFetch(`/album/${id}`);
+};
+
+export const searchSpotify = async (query, signal) => {
+  return await apiFetch(`/search?q=${encodeURIComponent(query)}`, { signal });
+};
+

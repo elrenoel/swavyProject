@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AddToListModal from "../sections/AddToListModal";
 import { useAuth } from "../../context/AuthContext";
 import { IoPauseCircleOutline, IoPlayCircleOutline } from "react-icons/io5";
+import { searchSpotify } from "../../services/spotify";
 
 const Navbar = ({ setCurrentTrack }) => {
   const [query, setQuery] = useState("");
@@ -39,17 +40,7 @@ const Navbar = ({ setCurrentTrack }) => {
     }
 
     try {
-      const res = await fetch(
-        `http://localhost:5000/api/search?q=${encodeURIComponent(keyword)}`,
-        { signal }, // Masukkan signal di sini
-      );
-
-      if (!res.ok) {
-        if (res.status === 429) console.error("Kena limit lagi!");
-        return;
-      }
-
-      const data = await res.json();
+      const data = await searchSpotify(keyword, signal);
 
       const albums = Array.isArray(data.albums) ? data.albums : [];
       const tracks = Array.isArray(data.tracks) ? data.tracks : [];

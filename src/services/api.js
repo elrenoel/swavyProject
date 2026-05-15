@@ -2,7 +2,7 @@
  * Base URL for all API requests.
  * All service files use `apiFetch` (below) which prepends this automatically.
  */
-export const API_BASE_URL = "http://localhost:5000/api";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 
 /** Normalises a path to always start with "/" and prepends API_BASE_URL. */
 const buildUrl = (path) => {

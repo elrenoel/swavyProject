@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import ReviewModal from "../components/review/ReviewModal";
 import { getTrackReviews, toggleReviewLike } from "../services/review";
+import { getTrack } from "../services/spotify";
 
 const TrackDetail = () => {
   const { id } = useParams();
@@ -13,8 +14,7 @@ const TrackDetail = () => {
   useEffect(() => {
     const fetchTrack = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/track/${id}`);
-        const data = await res.json();
+        const data = await getTrack(id);
         setTrack(data);
       } catch (error) {
         console.error(error);
