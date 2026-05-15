@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import ReviewModal from "../components/review/ReviewModal";
 import { getTrackReviews, toggleReviewLike } from "../services/review";
+import { getAlbum } from "../services/spotify";
 
 const AlbumDetail = () => {
   const { id } = useParams();
@@ -29,9 +30,7 @@ const AlbumDetail = () => {
   useEffect(() => {
     const fetchAlbum = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/album/${id}`);
-
-        const data = await res.json();
+        const data = await getAlbum(id);
         setAlbum(data);
       } catch (err) {
         console.error(err);
