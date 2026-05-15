@@ -1,7 +1,15 @@
 import React from "react";
 import album from "../../../assets/images/homebg.png";
 
-const ReviewCard = ({ title, artist, rating, snippet, isGray, image }) => {
+const ReviewCard = ({
+  title,
+  artist,
+  rating,
+  snippet,
+  isGray,
+  image,
+  trackId,
+}) => {
   const ratingValue = Number(rating) || 0;
   const ratingClass = (() => {
     if (ratingValue >= 5) return "bg-[#1DB954]";
@@ -15,11 +23,13 @@ const ReviewCard = ({ title, artist, rating, snippet, isGray, image }) => {
     <div className="flex items-start gap-4 group cursor-pointer w-full min-w-0">
       {/* Cover Album Kecil */}
       <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-200 rounded shrink-0 flex items-center justify-center text-xs text-gray-400 group-hover:scale-105 transition">
-        <img
-          className="w-full h-full object-cover rounded-md"
-          src={image || album}
-          alt=""
-        />
+        <a href={`../track/${trackId}`}>
+          <img
+            className="w-full h-full object-cover rounded-md"
+            src={image || album}
+            alt=""
+          />
+        </a>
       </div>
 
       {/* Info Ulasan */}

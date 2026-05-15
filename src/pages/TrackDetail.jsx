@@ -127,7 +127,9 @@ const TrackDetail = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-semibold text-sm">
-                      @{review.username || "anonymous"}
+                      <a href={`../profile/${review.username}`}>
+                        @{review.username || "anonymous"}
+                      </a>
                     </p>
                     {review.album_type !== "single" && review.album_name ? (
                       <p className="text-xs text-gray-400">
@@ -144,7 +146,7 @@ const TrackDetail = () => {
                   {"★".repeat(review.rating)}
                 </p>
 
-                <p className="text-sm text-gray-700 mt-2">
+                <p className="text-sm text-gray-700 mt-2 line-clamp-2 overflow-hidden break-all">
                   {review.content || "No comment"}
                 </p>
 

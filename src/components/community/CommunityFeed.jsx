@@ -36,7 +36,7 @@ const CommunityFeed = ({ activeTab }) => {
   return (
     <div className="space-y-6 mt-4">
       {pagedReviews.map((review, index) => (
-        <div key={review.id} className="p-4 border rounded-xl bg-white">
+        <div key={review.id} className="p-5 border border-gray-400 rounded-lg">
           <ReviewCard
             title={review.title}
             artist={review.artist}
@@ -44,11 +44,14 @@ const CommunityFeed = ({ activeTab }) => {
             snippet={review.content || "No review text yet."}
             isGray={index % 2 === 1}
             image={review.image}
+            trackId={review.trackId}
           />
 
           <div className="mt-3 flex items-center justify-between">
             <p className="text-xs text-gray-400">
-              @{review.username || "anonymous"}
+              <a href={`../profile/${review.username}`}>
+                @{review.username || "anonymous"}
+              </a>
             </p>
             <button
               onClick={async () => {

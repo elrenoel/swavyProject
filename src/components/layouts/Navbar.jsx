@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import AddToListModal from "../sections/AddToListModal";
 import { useAuth } from "../../context/AuthContext";
@@ -9,12 +9,12 @@ const Navbar = ({ setCurrentTrack }) => {
   const [results, setResults] = useState({ albums: [], tracks: [] });
   const navigate = useNavigate();
   const { user, isLoading, logout } = useAuth();
-  // const [open, setOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [currentAudio, setCurrentAudio] = useState(null);
   const [playingId, setPlayingId] = useState(null);
   const [selectedSong, setSelectedSong] = useState(null);
+  const searchCache = useRef({});
 
   const playInEmbed = (trackId) => {
     setCurrentTrack(null);
@@ -30,9 +30,24 @@ const Navbar = ({ setCurrentTrack }) => {
     navigate("/auth/login");
   };
 
-  const handleSearch = async (keyword) => {
+  const handleSearch = async (keyword, signal) => {
+    // Cek apakah hasil search untuk kata ini sudah ada di cache
+    if (searchCache.current[keyword]) {
+      console.log(`Using cache for: ${keyword}`);
+      setResults(searchCache.current[keyword]);
+      return;
+    }
+
     try {
-      const res = await fetch(`http://localhost:5000/api/search?q=${keyword}`);
+      const res = await fetch(
+        `http://localhost:5000/api/search?q=${encodeURIComponent(keyword)}`,
+        { signal }, // Masukkan signal di sini
+      );
+
+      if (!res.ok) {
+        if (res.status === 429) console.error("Kena limit lagi!");
+        return;
+      }
 
       const data = await res.json();
 
@@ -60,11 +75,20 @@ const Navbar = ({ setCurrentTrack }) => {
         preview: track.preview_url,
       }));
 
-      setResults({ albums: formattedAlbums, tracks: formattedTracks });
+      const finalResults = { albums: formattedAlbums, tracks: formattedTracks };
+
+      // 2. Simpan hasil ke cache sebelum update state
+      searchCache.current[keyword] = finalResults;
+      setResults(finalResults);
     } catch (err) {
-      console.error(err);
+      if (err.name === "AbortError") {
+        console.log("Request dibatalkan karena user ngetik lagi");
+      } else {
+        console.error(err);
+      }
     }
   };
+
   const handlePlay = (item) => {
     // stop kalau lagi play
     if (currentAudio) {
@@ -107,18 +131,26 @@ const Navbar = ({ setCurrentTrack }) => {
     return () => document.removeEventListener("click", handleClick);
   }, []);
 
+  // Update useEffect Debounce
   useEffect(() => {
+    const controller = new AbortController();
+
     const delay = setTimeout(() => {
-      if (query) {
-        handleSearch(query);
+      // Tambahkan syarat minimal karakter (misal: minimal 3 huruf)
+      // agar tidak fetch untuk query yang terlalu umum/pendek
+      if (query && query.length > 2) {
+        handleSearch(query, controller.signal);
         setIsSearchOpen(true);
       } else {
         setResults({ albums: [], tracks: [] });
         setIsSearchOpen(false);
       }
-    }, 300);
+    }, 600);
 
-    return () => clearTimeout(delay);
+    return () => {
+      delay && clearTimeout(delay);
+      controller.abort(); // Batalkan request jika user ngetik lagi
+    };
   }, [query]);
 
   return (

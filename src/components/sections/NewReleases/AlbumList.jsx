@@ -17,6 +17,7 @@ const AlbumList = ({ releases, loading, listRef }) => {
           releases.map((item) => (
             <AlbumCard
               key={item.id}
+              id={item.id}
               image={item.images[0]?.url}
               title={item.name}
               artist={item.artists.map((a) => a.name).join(", ")}

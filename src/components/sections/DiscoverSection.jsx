@@ -15,6 +15,10 @@ const DiscoverSection = () => {
   const lastKeywordRef = useRef("");
 
   useEffect(() => {
+    // Skip if the keyword hasn't changed (dedup repeated triggers).
+    // NOTE: We must NOT bail out if the cleanup previously cleared the
+    // pending fetch (e.g. React Strict Mode double-mount), so we reset
+    // lastKeywordRef in the cleanup below.
     if (lastKeywordRef.current === keyword) {
       return;
     }
@@ -28,10 +32,19 @@ const DiscoverSection = () => {
     let isMounted = true;
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
-      const data = await getDiscover(keyword);
-      if (!isMounted) return;
-      setTracks(data);
-      setLoading(false);
+      try {
+        const data = await getDiscover(keyword);
+        if (!isMounted) return;
+        setTracks(data);
+      } catch (err) {
+        // getDiscover currently swallows errors and returns [].
+        // This catch is a safety net for when that changes.
+        console.error("DiscoverSection fetch failed:", err);
+        if (!isMounted) return;
+        setTracks([]);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
     }, 350);
 
     return () => {
@@ -39,6 +52,11 @@ const DiscoverSection = () => {
       if (debounceRef.current) {
         clearTimeout(debounceRef.current);
       }
+      // Reset so the next mount with the same keyword will still fetch.
+      // Without this, React Strict Mode double-mount causes the effect to
+      // bail out on re-mount (keyword === lastKeywordRef) and loading
+      // stays true forever — the skeleton never disappears.
+      lastKeywordRef.current = "";
     };
   }, [keyword]);
 
