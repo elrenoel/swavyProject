@@ -1,10 +1,17 @@
-const allowedOrigins = ["http://localhost:5173"];
-if (process.env.CLIENT_URL) {
-  allowedOrigins.push(process.env.CLIENT_URL);
-}
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://swavy-app-project.vercel.app"
+];
 
 const corsOptions = {
-  origin: allowedOrigins,
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin || allowedOrigins.includes(origin) || origin === process.env.CLIENT_URL) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
