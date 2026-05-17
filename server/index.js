@@ -1,6 +1,8 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import corsOptions from "./src/config/cors.js";
 import authRoutes from "./src/routes/auth.route.js";
@@ -10,7 +12,6 @@ import reviewRoutes from "./src/routes/review.route.js";
 import profileRoutes from "./src/routes/profile.route.js";
 import errorHandler from "./src/middlewares/errorHandler.js";
 
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT;

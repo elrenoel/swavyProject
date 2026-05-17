@@ -48,6 +48,24 @@ export const createReview = async (payload) => {
   return data?.review || null;
 };
 
+export const updateReview = async (reviewId, payload) => {
+  const data = await apiFetch(`/reviews/${reviewId}`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+
+  return data?.review || null;
+};
+
+export const getMyTrackReview = async (trackId) => {
+  const data = await apiFetch(`/reviews/track/${trackId}/me`, {
+    headers: getAuthHeaders(),
+  });
+
+  return data?.review || null;
+};
+
 /**
  * Toggle like on a review. Throws if not authenticated (401).
  * Returns { liked: boolean, likes_count: number }.

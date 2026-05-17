@@ -14,7 +14,7 @@ export const getLists = async (req, res) => {
 export const getListById = async (req, res) => {
   try {
     const { id } = req.params;
-    const list = await listService.getListById(req.supabase, req.user.id, id);
+    const list = await listService.getListById(req.supabase, id);
 
     if (!list) {
       return res.status(404).json({ error: "List not found" });

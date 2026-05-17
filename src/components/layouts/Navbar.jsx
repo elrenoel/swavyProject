@@ -459,9 +459,6 @@ const Navbar = ({ setCurrentTrack }) => {
           md:hidden
         "
         >
-          <a className="hover:bg-gray-200 w-full py-4 text-center" href="/">
-            Home
-          </a>
           <a
             className="hover:bg-gray-200 w-full py-4 text-center"
             href="/discover"

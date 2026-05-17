@@ -40,6 +40,7 @@ const PopularReviews = () => {
               snippet={review.content || "No review text yet."}
               isGray={index % 2 === 1}
               image={review.image_url}
+              trackId={review.track_id}
             />
           ))
         ) : (
