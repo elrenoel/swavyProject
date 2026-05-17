@@ -2,10 +2,11 @@ import * as authService from "../services/auth.service.js";
 
 const AUTH_COOKIE_NAME = "access_token";
 const AUTH_REFRESH_COOKIE_NAME = "refresh_token";
+const isProd = process.env.NODE_ENV === "production";
 const AUTH_COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "lax",
+  secure: isProd,
+  sameSite: isProd ? "none" : "lax",
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
@@ -115,15 +116,16 @@ export const me = async (req, res) => {
 };
 
 export const logout = async (req, res) => {
+  const isProd = process.env.NODE_ENV === "production";
   res.clearCookie(AUTH_COOKIE_NAME, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
   });
   res.clearCookie(AUTH_REFRESH_COOKIE_NAME, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
   });
 
   return res.status(200).json({ message: "Logout successful" });
