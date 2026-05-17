@@ -185,6 +185,13 @@ export const updateProfile = async (req, res) => {
       updates,
     );
 
+    if (username) {
+      // Also update the auth user's metadata so the frontend session gets the new username
+      await req.supabase.auth.updateUser({
+        data: { username },
+      });
+    }
+
     return res.status(200).json({ profile });
   } catch (error) {
     return res.status(500).json({ error: error.message });
