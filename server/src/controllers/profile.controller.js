@@ -1,6 +1,5 @@
 import { supabase, createUserClient } from "../config/supabase.js";
 import * as profileService from "../services/profile.service.js";
-
 const parsePositiveInt = (value, fallback) => {
   const parsed = Number.parseInt(value, 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
@@ -9,6 +8,14 @@ const parsePositiveInt = (value, fallback) => {
 const parseNonNegativeInt = (value, fallback) => {
   const parsed = Number.parseInt(value, 10);
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
+};
+const getClient = (req) => {
+  const authHeader = req.headers.authorization || "";
+  if (authHeader.startsWith("Bearer ")) {
+    const token = authHeader.slice("Bearer ".length).trim();
+    return createUserClient(token);
+  }
+  return supabase;
 };
 
 const extractAccessToken = (req) => {
@@ -51,8 +58,9 @@ const getFileExtension = (contentType) => {
 export const getProfileByUsername = async (req, res) => {
   try {
     const { username } = req.params;
+    const client = getClient(req);
     const profile = await profileService.getProfileByUsername(
-      supabase,
+      client,
       username,
     );
 
@@ -66,7 +74,7 @@ export const getProfileByUsername = async (req, res) => {
     let isFollowing = false;
     if (viewerUserId && !isMe) {
       isFollowing = await profileService.getFollowStatus(
-        supabase,
+        client,
         viewerUserId,
         profile.id,
       );
@@ -85,8 +93,9 @@ export const getProfileByUsername = async (req, res) => {
 export const getProfileStats = async (req, res) => {
   try {
     const { username } = req.params;
+    const client = getClient(req);
     const profile = await profileService.getProfileByUsername(
-      supabase,
+      client,
       username,
     );
 
@@ -94,7 +103,7 @@ export const getProfileStats = async (req, res) => {
       return res.status(404).json({ error: "Profile not found" });
     }
 
-    const stats = await profileService.getProfileStats(supabase, profile.id);
+    const stats = await profileService.getProfileStats(client, profile.id);
     return res.status(200).json({ stats });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -105,8 +114,9 @@ export const getProfileTopPicks = async (req, res) => {
   try {
     const { username } = req.params;
     const limit = parsePositiveInt(req.query.limit, 4);
+    const client = getClient(req);
     const profile = await profileService.getProfileByUsername(
-      supabase,
+      client,
       username,
     );
 
@@ -115,7 +125,7 @@ export const getProfileTopPicks = async (req, res) => {
     }
 
     const reviews = await profileService.getTopPicks(
-      supabase,
+      client,
       profile.id,
       limit,
     );
@@ -131,8 +141,10 @@ export const getProfileLists = async (req, res) => {
     const { username } = req.params;
     const limit = parsePositiveInt(req.query.limit, 4);
     const offset = parseNonNegativeInt(req.query.offset, 0);
+    const client = getClient(req);
+    
     const profile = await profileService.getProfileByUsername(
-      supabase,
+      client,
       username,
     );
 
@@ -140,7 +152,7 @@ export const getProfileLists = async (req, res) => {
       return res.status(404).json({ error: "Profile not found" });
     }
 
-    const result = await profileService.getListsByUser(supabase, profile.id, {
+    const result = await profileService.getListsByUser(client, profile.id, {
       limit,
       offset,
     });

@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import ReviewModal from "../components/review/ReviewModal";
 import { getTrackReviews, toggleReviewLike } from "../services/review";
 import { getTrack } from "../services/spotify";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 
 const TrackDetail = () => {
   const { id } = useParams();
@@ -126,11 +127,14 @@ const TrackDetail = () => {
               <div key={review.id} className="p-4 border rounded-xl bg-white">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-semibold text-sm">
+                    <div className="font-semibold text-sm flex items-center gap-1">
+                      <div>@{review.username || "anonymous"} - </div>
                       <a href={`../profile/${review.username}`}>
-                        @{review.username || "anonymous"}
+                        <div className="text-blue-500 text-xs font-normal">
+                          view profile
+                        </div>
                       </a>
-                    </p>
+                    </div>
                     {review.album_type !== "single" && review.album_name ? (
                       <p className="text-xs text-gray-400">
                         {review.album_name}
@@ -152,11 +156,21 @@ const TrackDetail = () => {
 
                 <button
                   onClick={() => handleToggleLike(review.id)}
-                  className={`text-xs mt-2 ${
-                    review.liked_by_me ? "text-green-600" : "text-gray-500"
+                  className={`text-xs mt-2 transition ${
+                    review.liked_by_me
+                      ? "text-green-600 hover:text-green-700"
+                      : "text-gray-500 hover:text-green-600"
                   }`}
                 >
-                  {review.liked_by_me ? "💚" : "❤️"} {review.likes_count || 0}
+                  {review.liked_by_me ? (
+                    <div className="flex items-center gap-1">
+                      <FaHeart size={20} /> {review.likes_count || 0}
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <FaRegHeart size={20} /> {review.likes_count || 0}
+                    </div>
+                  )}
                 </button>
               </div>
             ))}

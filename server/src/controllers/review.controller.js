@@ -86,6 +86,44 @@ export const createReview = async (req, res) => {
   }
 };
 
+export const updateReview = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating, content } = req.body;
+    const ratingValue = Number(rating);
+
+    if (!Number.isFinite(ratingValue) || ratingValue < 1 || ratingValue > 5) {
+      return res.status(400).json({ error: "Rating must be 1-5" });
+    }
+
+    const payload = {
+      rating: ratingValue,
+      content: content || null,
+    };
+
+    const review = await reviewService.updateReview(req.supabase, id, req.user.id, payload);
+    return res.status(200).json({ review });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+export const getMyTrackReview = async (req, res) => {
+  try {
+    const { id: trackId } = req.params;
+    
+    if (!req.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const review = await reviewService.getMyTrackReview(req.supabase, trackId, req.user.id);
+    return res.status(200).json({ review });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+
 export const getRecentReviews = async (req, res) => {
   try {
     const limit = parsePositiveInt(req.query.limit, 100);

@@ -1,13 +1,38 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useReviews } from "../../context/ReviewContext";
+import { getMyTrackReview } from "../../services/review";
 
 const ReviewModal = ({ track, onClose }) => {
   const { user } = useAuth();
-  const { createReview } = useReviews();
+  const { createReview, updateReview } = useReviews();
   const [rating, setRating] = useState(0);
   const [text, setText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingReview, setIsLoadingReview] = useState(true);
+  const [existingReviewId, setExistingReviewId] = useState(null);
+
+  useEffect(() => {
+    const fetchExistingReview = async () => {
+      if (!user) {
+        setIsLoadingReview(false);
+        return;
+      }
+      try {
+        const review = await getMyTrackReview(track.id);
+        if (review) {
+          setExistingReviewId(review.id);
+          setRating(review.rating);
+          setText(review.content || "");
+        }
+      } catch (error) {
+        console.error("Failed to fetch existing review", error);
+      } finally {
+        setIsLoadingReview(false);
+      }
+    };
+    fetchExistingReview();
+  }, [track.id, user]);
 
   const handleSubmit = async () => {
     if (!user) {
@@ -22,7 +47,7 @@ const ReviewModal = ({ track, onClose }) => {
 
     setIsSubmitting(true);
     try {
-      await createReview({
+      const payload = {
         track_id: track.id,
         album_id: track.albumId || null,
         album_name: track.albumName || null,
@@ -32,7 +57,13 @@ const ReviewModal = ({ track, onClose }) => {
         image_url: track.image,
         rating,
         content: text,
-      });
+      };
+
+      if (existingReviewId) {
+        await updateReview(existingReviewId, { rating, content: text });
+      } else {
+        await createReview(payload);
+      }
       onClose();
     } catch (error) {
       alert(error?.message || "Gagal membuat review");
@@ -44,7 +75,9 @@ const ReviewModal = ({ track, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-xl p-6 w-100">
-        <h2 className="text-lg font-semibold mb-4">Write Review</h2>
+        <h2 className="text-lg font-semibold mb-4">
+          {isLoadingReview ? "Loading..." : existingReviewId ? "Update Review" : "Write Review"}
+        </h2>
 
         {/* STAR */}
         <div className="flex gap-2 mb-4">
@@ -75,9 +108,11 @@ const ReviewModal = ({ track, onClose }) => {
           <button
             onClick={handleSubmit}
             className="bg-green-500 text-white px-4 py-2 rounded disabled:opacity-60"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isLoadingReview}
           >
-            {isSubmitting ? "Publishing..." : "Publish"}
+            {isSubmitting
+              ? existingReviewId ? "Updating..." : "Publishing..."
+              : existingReviewId ? "Update" : "Publish"}
           </button>
         </div>
       </div>

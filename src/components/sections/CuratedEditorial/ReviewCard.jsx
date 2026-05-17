@@ -34,9 +34,9 @@ const ReviewCard = ({
 
       {/* Info Ulasan */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center justify-between mb-1 gap-4">
           <div>
-            <h4 className="text-sm font-bold text-gray-900 leading-none mb-1 truncate">
+            <h4 className="text-sm font-bold text-gray-900 leading-none mb-1 line-clamp-2 overflow-hidden break-all">
               {title}
             </h4>
             <p className="text-xs text-gray-500 truncate">{artist}</p>

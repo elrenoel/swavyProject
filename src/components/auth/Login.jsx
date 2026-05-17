@@ -34,7 +34,6 @@ const Login = () => {
       if (data?.access_token) {
         localStorage.setItem("access_token", data.access_token);
       }
-      console.log("Login success:", data);
       await refreshUser();
       navigate("/");
     } catch (error) {

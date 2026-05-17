@@ -1,6 +1,8 @@
 import ProfileAlbumCard from "./ProfileAlbumCard";
 
-const ProfileTopPicks = ({ reviews = [] }) => {
+const ProfileTopPicks = ({ reviews = [], onViewAll }) => {
+  const visibleReviews = reviews.slice(0, 4);
+
   return (
     <div>
       <div
@@ -10,12 +12,19 @@ const ProfileTopPicks = ({ reviews = [] }) => {
     mb-4"
       >
         <h2 className="text-lg md:text-xl font-['Newsreader']">The Top 4</h2>
-        <span className="text-xs md:text-sm text-gray-400">VIEW ALL</span>
+        {reviews.length > 4 && (
+          <button
+            onClick={onViewAll}
+            className="text-xs md:text-sm text-gray-400 cursor-pointer hover:text-black transition"
+          >
+            VIEW ALL
+          </button>
+        )}
       </div>
 
-      {reviews.length ? (
+      {visibleReviews.length ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-          {reviews.map((review) => (
+          {visibleReviews.map((review) => (
             <ProfileAlbumCard key={review.id} review={review} />
           ))}
         </div>

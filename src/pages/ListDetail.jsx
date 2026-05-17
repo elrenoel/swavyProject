@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useLists } from "../context/ListContext";
+import { useAuth } from "../context/AuthContext";
 import {
   removeSongFromList as removeSongApi,
   getListById as getListByIdApi,
@@ -9,6 +10,7 @@ import {
 const ListDetail = ({ setCurrentTrack }) => {
   const { id } = useParams();
   const { getListById } = useLists();
+  const { user } = useAuth();
   const [list, setList] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -80,25 +82,29 @@ const ListDetail = ({ setCurrentTrack }) => {
             </div>
 
             {/* RIGHT */}
-            <button
-              onClick={() => setCurrentTrack(song.id)}
-              className="text-green-600 text-sm"
-            >
-              ▶ Play
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setCurrentTrack(song.id)}
+                className="text-green-600 text-sm"
+              >
+                ▶ Play
+              </button>
 
-            <button
-              onClick={async () => {
-                if (confirm("Remove this song?")) {
-                  await removeSongApi(list.id, song.id);
-                  const refreshed = await getListByIdApi(list.id);
-                  setList(refreshed);
-                }
-              }}
-              className="text-red-500 text-sm"
-            >
-              ✕
-            </button>
+              {user?.id === list.user_id && (
+                <button
+                  onClick={async () => {
+                    if (confirm("Remove this song?")) {
+                      await removeSongApi(list.id, song.id);
+                      const refreshed = await getListByIdApi(list.id);
+                      setList(refreshed);
+                    }
+                  }}
+                  className="text-red-500 text-sm"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
           </div>
         ))}
       </div>

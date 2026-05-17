@@ -8,6 +8,7 @@ const mapSongRow = (row) => ({
 
 const mapListRow = (row) => ({
   id: row.id,
+  user_id: row.user_id,
   title: row.title,
   desc: row.description,
   created_at: row.created_at,
@@ -28,13 +29,12 @@ export const getLists = async (supabaseClient, userId) => {
   return (data || []).map(mapListRow);
 };
 
-export const getListById = async (supabaseClient, userId, listId) => {
+export const getListById = async (supabaseClient, listId) => {
   const { data, error } = await supabaseClient
     .from("lists")
     .select(
-      "id, title, description, created_at, list_songs (song_id, title, artist, image, created_at)",
+      "id, user_id, title, description, created_at, list_songs (song_id, title, artist, image, created_at)",
     )
-    .eq("user_id", userId)
     .eq("id", listId)
     .maybeSingle();
 

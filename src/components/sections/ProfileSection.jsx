@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useLists } from "../../context/ListContext";
 import ProfileHeader from "../profile/ProfileHeader";
 import ProfileStats from "../profile/ProfileStats";
 import ProfileTopPicks from "../profile/ProfileTopPicks";
 import ProfileCollection from "../profile/ProfileCollection";
 import ProfileEditModal from "../profile/ProfileEditModal";
+import ProfileAllReviews from "../profile/ProfileAllReviews";
 import {
   followProfile,
   getProfileByUsername,
-  getProfileLists,
   getProfileStats,
   getProfileTopPicks,
+  getProfileLists,
   unfollowProfile,
   updateProfile,
   uploadProfileAvatar,
@@ -76,15 +78,16 @@ const ProfileSkeleton = () => (
 
 const ProfileSection = ({ username }) => {
   const { user, refreshUser } = useAuth();
+  const { lists } = useLists();
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState(null);
   const [topPicks, setTopPicks] = useState([]);
-  const [lists, setLists] = useState([]);
-  const [listsTotal, setListsTotal] = useState(0);
+  const [profileLists, setProfileLists] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [activeView, setActiveView] = useState("overview");
 
   const isOwnProfile = profile?.id && user?.id === profile.id;
 
@@ -105,18 +108,17 @@ const ProfileSection = ({ username }) => {
         setProfile(profileData.profile);
         setIsFollowing(!!profileData.isFollowing);
 
-        const [nextStats, nextTopPicks, listResult] = await Promise.all([
+        const [nextStats, nextTopPicks, nextLists] = await Promise.all([
           getProfileStats(username),
-          getProfileTopPicks(username, 4),
-          getProfileLists(username, { limit: 100, offset: 0 }),
+          getProfileTopPicks(username, 100),
+          getProfileLists(username, { limit: 10 }),
         ]);
 
         if (!isMounted) return;
 
         setStats(nextStats);
         setTopPicks(nextTopPicks);
-        setLists(listResult.lists || []);
-        setListsTotal(listResult.total || 0);
+        setProfileLists(nextLists?.lists || []);
       } catch (err) {
         if (!isMounted) return;
         setError(err?.message || "Failed to load profile");
@@ -196,9 +198,30 @@ const ProfileSection = ({ username }) => {
         onEdit={() => setIsEditing(true)}
         onFollow={handleFollowToggle}
       />
-      <ProfileStats stats={stats} />
-      <ProfileTopPicks reviews={topPicks} />
-      <ProfileCollection lists={lists} total={listsTotal} />
+
+      {activeView === "overview" ? (
+        <>
+          <ProfileStats
+            stats={stats}
+            lists={isOwnProfile ? lists : profileLists}
+          />
+          <ProfileTopPicks
+            reviews={topPicks}
+            isOwnProfile={isOwnProfile}
+            onViewAll={() => setActiveView("reviews")}
+          />
+          <ProfileCollection
+            lists={isOwnProfile ? lists : profileLists}
+            total={(isOwnProfile ? lists : profileLists).length}
+          />
+        </>
+      ) : activeView === "reviews" ? (
+        <ProfileAllReviews
+          reviews={topPicks}
+          isOwnProfile={isOwnProfile}
+          onBack={() => setActiveView("overview")}
+        />
+      ) : null}
 
       {isEditing ? (
         <ProfileEditModal

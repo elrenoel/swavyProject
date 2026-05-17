@@ -30,6 +30,43 @@ export const createReview = async (supabaseClient, payload) => {
   return mapReviewRow(data);
 };
 
+export const updateReview = async (supabaseClient, reviewId, userId, payload) => {
+  const { data, error } = await supabaseClient
+    .from("reviews")
+    .update({
+      rating: payload.rating,
+      content: payload.content,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", reviewId)
+    .eq("user_id", userId)
+    .select(
+      "id, user_id, username, track_id, album_id, album_name, album_type, title, artist, image_url, rating, content, likes_count, created_at, updated_at",
+    )
+    .single();
+
+  if (error) throw error;
+
+  return mapReviewRow(data);
+};
+
+export const getMyTrackReview = async (supabaseClient, trackId, userId) => {
+  const { data, error } = await supabaseClient
+    .from("reviews")
+    .select(
+      "id, user_id, username, track_id, album_id, album_name, album_type, title, artist, image_url, rating, content, likes_count, created_at, updated_at",
+    )
+    .eq("track_id", trackId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) throw error;
+  
+  if (!data) return null;
+
+  return mapReviewRow(data);
+};
+
 export const getRecentReviews = async (
   supabaseClient,
   { limit, offset, viewerUserId, viewerClient },
@@ -158,10 +195,17 @@ export const toggleReviewLike = async (supabaseClient, reviewId, userId) => {
       .from("review_likes")
       .insert({ review_id: reviewId, user_id: userId });
 
-    if (insertError) throw insertError;
-
-    nextLikes = nextLikes + 1;
-    liked = true;
+    if (insertError) {
+      if (insertError.code === "23505" || insertError.message?.includes("duplicate key")) {
+        // Already liked due to race condition, treat as success
+        liked = true;
+      } else {
+        throw insertError;
+      }
+    } else {
+      nextLikes = nextLikes + 1;
+      liked = true;
+    }
   }
 
   const { data: updated, error: updateError } = await supabaseClient

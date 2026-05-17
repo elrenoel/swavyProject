@@ -30,7 +30,7 @@ const DiscoverCard = ({ track, rank }) => {
       </div>
 
       {/* INFO */}
-      <div>
+      <div className="px-2 pb-2">
         <h3 className="text-lg font-medium line-clamp-1">{track.name}</h3>
 
         <p className="text-sm text-gray-500 line-clamp-1">

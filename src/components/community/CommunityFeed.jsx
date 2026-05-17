@@ -1,6 +1,7 @@
 import { useAuth } from "../../context/AuthContext";
 import { useReviews } from "../../context/ReviewContext";
 import ReviewCard from "../sections/CuratedEditorial/ReviewCard";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 
 const CommunityFeed = ({ activeTab }) => {
   const { user } = useAuth();
@@ -48,11 +49,14 @@ const CommunityFeed = ({ activeTab }) => {
           />
 
           <div className="mt-3 flex items-center justify-between">
-            <p className="text-xs text-gray-400">
+            <div className="text-xs text-gray-400 flex items-center gap-1">
+              @{review.username || "anonymous"} -
               <a href={`../profile/${review.username}`}>
-                @{review.username || "anonymous"}
+                <div className="text-blue-300 text-xs font-normal">
+                  view profile
+                </div>
               </a>
-            </p>
+            </div>
             <button
               onClick={async () => {
                 if (!user) {
@@ -65,11 +69,18 @@ const CommunityFeed = ({ activeTab }) => {
                   alert(error?.message || "Gagal update like");
                 }
               }}
-              className={`text-xs ${
-                review.likedByMe ? "text-green-600" : "text-gray-500"
+              className={`text-xs flex items-center gap-1 transition ${
+                review.likedByMe
+                  ? "text-green-600"
+                  : "text-gray-500 hover:text-green-600"
               }`}
             >
-              {review.likedByMe ? "💚" : "❤️"} {review.likes}
+              {review.likedByMe ? (
+                <FaHeart size={20} />
+              ) : (
+                <FaRegHeart size={20} />
+              )}
+              <span className="text-sm">{review.likes}</span>
             </button>
           </div>
         </div>
