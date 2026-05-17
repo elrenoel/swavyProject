@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useLists } from "../../context/ListContext";
 import ProfileHeader from "../profile/ProfileHeader";
@@ -77,6 +78,7 @@ const ProfileSkeleton = () => (
 );
 
 const ProfileSection = ({ username }) => {
+  const navigate = useNavigate();
   const { user, refreshUser } = useAuth();
   const { lists } = useLists();
   const [profile, setProfile] = useState(null);
@@ -170,6 +172,10 @@ const ProfileSection = ({ username }) => {
 
     setProfile(nextProfile);
     await refreshUser();
+
+    if (username && username !== profile.username) {
+      navigate(`/profile/${username}`, { replace: true });
+    }
   };
 
   if (isLoading) {
