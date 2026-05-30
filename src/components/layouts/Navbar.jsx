@@ -16,6 +16,9 @@ const Navbar = ({ setCurrentTrack }) => {
   const [playingId, setPlayingId] = useState(null);
   const [selectedSong, setSelectedSong] = useState(null);
   const searchCache = useRef({});
+  const profileHref = user?.user_metadata?.username
+    ? `/profile/${user.user_metadata.username}`
+    : "/profile";
 
   const playInEmbed = (trackId) => {
     setCurrentTrack(null);
@@ -426,7 +429,7 @@ const Navbar = ({ setCurrentTrack }) => {
           <a href="/community" className="hover:text-gray-500">
             Community
           </a>
-          <a href="/profile" className="hover:text-gray-500">
+          <a href={profileHref} className="hover:text-gray-500">
             Profile
           </a>
         </div>
@@ -476,7 +479,7 @@ const Navbar = ({ setCurrentTrack }) => {
           </a>
           <a
             className="hover:bg-gray-200 w-full py-4 text-center"
-            href="/profile"
+            href={profileHref}
           >
             Profile
           </a>
