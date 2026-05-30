@@ -185,7 +185,7 @@ const AlbumDetail = () => {
                     r.liked_by_me ? "text-green-600" : "text-gray-500"
                   }`}
                 >
-                  {r.liked_by_me ? "💚" : "❤️"} {r.likes_count || 0}
+                  {r.liked_by_me ? "Liked" : "Like"} ({r.likes_count || 0})
                 </button>
               </div>
             ))}
@@ -197,3 +197,4 @@ const AlbumDetail = () => {
 };
 
 export default AlbumDetail;
+

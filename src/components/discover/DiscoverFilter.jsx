@@ -6,17 +6,11 @@ const DiscoverFilter = ({ setKeyword }) => {
         Top Hits
       </button>
 
-      <button onClick={() => setKeyword("viral hits")}>
-        Viral 🔥
-      </button>
+      <button onClick={() => setKeyword("viral hits")}>Viral</button>
 
-      <button onClick={() => setKeyword("indonesia hits")}>
-        Indo 🇮🇩
-      </button>
+      <button onClick={() => setKeyword("indonesia hits")}>Indo</button>
 
-      <button onClick={() => setKeyword("tiktok songs")}>
-        TikTok 🎵
-      </button>
+      <button onClick={() => setKeyword("tiktok songs")}>TikTok</button>
 
     </div>
   );

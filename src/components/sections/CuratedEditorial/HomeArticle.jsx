@@ -44,7 +44,7 @@ const HomeArticle = () => {
       {/* 2 Kartu Kecil di Bawah */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 hover:shadow-lg transition cursor-pointer">
-          <div className="text-[#1DB954] mb-4">✨</div>
+          <div className="text-[#1DB954] mb-4 text-xs font-semibold uppercase">Featured</div>
           <h4 className="text-lg font-[Liberation_Serif] text-gray-900 mb-2 leading-snug">
             Underground Seoul: The New wave of K-Indie
           </h4>
@@ -74,3 +74,4 @@ const HomeArticle = () => {
 };
 
 export default HomeArticle;
+

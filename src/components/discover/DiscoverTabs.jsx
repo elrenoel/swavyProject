@@ -1,7 +1,7 @@
 const tabs = [
-  { key: "trending", label: "Trending 🔥" },
-  { key: "fresh", label: "Fresh 🆕" },
-  { key: "top", label: "Top 🏆" },
+  { key: "trending", label: "Trending" },
+  { key: "fresh", label: "Fresh" },
+  { key: "top", label: "Top" },
 ];
 
 const DiscoverTabs = ({ activeTab, setActiveTab }) => {
