@@ -16,6 +16,37 @@ const mapReviewRow = (row) => ({
   updated_at: row.updated_at,
 });
 
+const attachCurrentUsernames = async (supabaseClient, rows) => {
+  if (!Array.isArray(rows) || rows.length === 0) {
+    return [];
+  }
+
+  const userIds = [...new Set(rows.map((row) => row.user_id).filter(Boolean))];
+
+  if (!userIds.length) {
+    return rows.map(mapReviewRow);
+  }
+
+  const { data: profiles, error } = await supabaseClient
+    .from("profiles")
+    .select("id, username")
+    .in("id", userIds);
+
+  if (error) throw error;
+
+  const usernameByUserId = new Map(
+    (profiles || []).map((profile) => [profile.id, profile.username]),
+  );
+
+  return rows.map((row) => {
+    const mapped = mapReviewRow(row);
+    return {
+      ...mapped,
+      username: usernameByUserId.get(row.user_id) || mapped.username,
+    };
+  });
+};
+
 export const createReview = async (supabaseClient, payload) => {
   const { data, error } = await supabaseClient
     .from("reviews")
@@ -30,7 +61,12 @@ export const createReview = async (supabaseClient, payload) => {
   return mapReviewRow(data);
 };
 
-export const updateReview = async (supabaseClient, reviewId, userId, payload) => {
+export const updateReview = async (
+  supabaseClient,
+  reviewId,
+  userId,
+  payload,
+) => {
   const { data, error } = await supabaseClient
     .from("reviews")
     .update({
@@ -61,7 +97,7 @@ export const getMyTrackReview = async (supabaseClient, trackId, userId) => {
     .maybeSingle();
 
   if (error) throw error;
-  
+
   if (!data) return null;
 
   return mapReviewRow(data);
@@ -97,10 +133,12 @@ export const getRecentReviews = async (
   }
 
   return {
-    reviews: (data || []).map((row) => ({
-      ...mapReviewRow(row),
-      liked_by_me: likedSet.has(row.id),
-    })),
+    reviews: (await attachCurrentUsernames(supabaseClient, data || [])).map(
+      (row) => ({
+        ...row,
+        liked_by_me: likedSet.has(row.id),
+      }),
+    ),
     total: count || 0,
   };
 };
@@ -135,10 +173,12 @@ export const getTrackReviews = async (
   }
 
   return {
-    reviews: (data || []).map((row) => ({
-      ...mapReviewRow(row),
-      liked_by_me: likedSet.has(row.id),
-    })),
+    reviews: (await attachCurrentUsernames(supabaseClient, data || [])).map(
+      (row) => ({
+        ...row,
+        liked_by_me: likedSet.has(row.id),
+      }),
+    ),
   };
 };
 
@@ -155,7 +195,7 @@ export const getPopularReviews = async (supabaseClient, { limit, since }) => {
 
   if (error) throw error;
 
-  return { reviews: (data || []).map(mapReviewRow) };
+  return { reviews: await attachCurrentUsernames(supabaseClient, data || []) };
 };
 
 export const toggleReviewLike = async (supabaseClient, reviewId, userId) => {
@@ -196,7 +236,10 @@ export const toggleReviewLike = async (supabaseClient, reviewId, userId) => {
       .insert({ review_id: reviewId, user_id: userId });
 
     if (insertError) {
-      if (insertError.code === "23505" || insertError.message?.includes("duplicate key")) {
+      if (
+        insertError.code === "23505" ||
+        insertError.message?.includes("duplicate key")
+      ) {
         // Already liked due to race condition, treat as success
         liked = true;
       } else {

@@ -32,6 +32,24 @@ const mapReviewRow = (row) => ({
   updated_at: row.updated_at,
 });
 
+export const getProfileById = async (supabaseClient, userId) => {
+  const { data, error } = await supabaseClient
+    .from("profiles")
+    .select("id, username, full_name, avatar_url, updated_at")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) throw error;
+
+  return data || null;
+};
+
+const isUuid = (value) =>
+  typeof value === "string" &&
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value,
+  );
+
 export const getProfileByUsername = async (supabaseClient, username) => {
   const { data, error } = await supabaseClient
     .from("profiles")
@@ -41,7 +59,11 @@ export const getProfileByUsername = async (supabaseClient, username) => {
 
   if (error) throw error;
 
-  return data || null;
+  if (data) return data;
+
+  if (!isUuid(username)) return null;
+
+  return getProfileById(supabaseClient, username);
 };
 
 export const updateProfile = async (supabaseClient, userId, updates) => {

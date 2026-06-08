@@ -22,6 +22,12 @@ export const getProfileByUsername = async (username) => {
   return data;
 };
 
+/** Fetch the logged-in user's current profile record. */
+export const getMyProfile = async () => {
+  const data = await apiFetch("/profiles/me");
+  return data?.profile || null;
+};
+
 /** Fetch profile statistics (reviews count, followers, following, lists). */
 export const getProfileStats = async (username) => {
   const data = await apiFetch(
@@ -91,4 +97,3 @@ export const unfollowProfile = async (username) => {
   );
   return data;
 };
-

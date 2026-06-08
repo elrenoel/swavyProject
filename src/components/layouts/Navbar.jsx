@@ -9,16 +9,18 @@ const Navbar = ({ setCurrentTrack }) => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState({ albums: [], tracks: [] });
   const navigate = useNavigate();
-  const { user, isLoading, logout } = useAuth();
+  const { user, profile, isLoading, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [currentAudio, setCurrentAudio] = useState(null);
   const [playingId, setPlayingId] = useState(null);
   const [selectedSong, setSelectedSong] = useState(null);
   const searchCache = useRef({});
-  const profileHref = user?.user_metadata?.username
-    ? `/profile/${user.user_metadata.username}`
-    : "/profile";
+  const profileHref = profile?.username
+    ? `/profile/${profile.username}`
+    : user?.user_metadata?.username
+      ? `/profile/${user.user_metadata.username}`
+      : "/profile";
 
   const playInEmbed = (trackId) => {
     setCurrentTrack(null);

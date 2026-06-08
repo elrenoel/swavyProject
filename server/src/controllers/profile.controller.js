@@ -59,10 +59,7 @@ export const getProfileByUsername = async (req, res) => {
   try {
     const { username } = req.params;
     const client = getClient(req);
-    const profile = await profileService.getProfileByUsername(
-      client,
-      username,
-    );
+    const profile = await profileService.getProfileByUsername(client, username);
 
     if (!profile) {
       return res.status(404).json({ error: "Profile not found" });
@@ -90,14 +87,26 @@ export const getProfileByUsername = async (req, res) => {
   }
 };
 
+export const getMyProfile = async (req, res) => {
+  try {
+    const client = getClient(req);
+    const profile = await profileService.getProfileById(client, req.user.id);
+
+    if (!profile) {
+      return res.status(404).json({ error: "Profile not found" });
+    }
+
+    return res.status(200).json({ profile });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 export const getProfileStats = async (req, res) => {
   try {
     const { username } = req.params;
     const client = getClient(req);
-    const profile = await profileService.getProfileByUsername(
-      client,
-      username,
-    );
+    const profile = await profileService.getProfileByUsername(client, username);
 
     if (!profile) {
       return res.status(404).json({ error: "Profile not found" });
@@ -115,20 +124,13 @@ export const getProfileTopPicks = async (req, res) => {
     const { username } = req.params;
     const limit = parsePositiveInt(req.query.limit, 4);
     const client = getClient(req);
-    const profile = await profileService.getProfileByUsername(
-      client,
-      username,
-    );
+    const profile = await profileService.getProfileByUsername(client, username);
 
     if (!profile) {
       return res.status(404).json({ error: "Profile not found" });
     }
 
-    const reviews = await profileService.getTopPicks(
-      client,
-      profile.id,
-      limit,
-    );
+    const reviews = await profileService.getTopPicks(client, profile.id, limit);
 
     return res.status(200).json({ reviews });
   } catch (error) {
@@ -142,11 +144,8 @@ export const getProfileLists = async (req, res) => {
     const limit = parsePositiveInt(req.query.limit, 4);
     const offset = parseNonNegativeInt(req.query.offset, 0);
     const client = getClient(req);
-    
-    const profile = await profileService.getProfileByUsername(
-      client,
-      username,
-    );
+
+    const profile = await profileService.getProfileByUsername(client, username);
 
     if (!profile) {
       return res.status(404).json({ error: "Profile not found" });

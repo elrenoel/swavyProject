@@ -1,6 +1,7 @@
 import { Router } from "express";
 import authenticate from "../middlewares/authenticate.js";
 import {
+  getMyProfile,
   getProfileByUsername,
   getProfileStats,
   getProfileTopPicks,
@@ -13,6 +14,7 @@ import {
 
 const profileRoutes = Router();
 
+profileRoutes.get("/me", authenticate, getMyProfile);
 profileRoutes.get("/:username", getProfileByUsername);
 profileRoutes.get("/:username/stats", getProfileStats);
 profileRoutes.get("/:username/top-picks", getProfileTopPicks);
