@@ -8,12 +8,23 @@ use PDO;
 
 final class ProfileService
 {
+    public static function getById(PDO $pdo, string $userId): ?array
+    {
+        $stmt = $pdo->prepare('SELECT id, username, full_name, avatar_url, updated_at FROM profiles WHERE id=:id LIMIT 1');
+        $stmt->execute(['id' => $userId]);
+        $row = $stmt->fetch();
+        return $row ?: null;
+    }
+
     public static function getByUsername(PDO $pdo, string $username): ?array
     {
         $stmt = $pdo->prepare('SELECT id, username, full_name, avatar_url, updated_at FROM profiles WHERE username=:u LIMIT 1');
         $stmt->execute(['u' => $username]);
         $row = $stmt->fetch();
-        return $row ?: null;
+        if ($row) return $row;
+
+        if (!self::isUuid($username)) return null;
+        return self::getById($pdo, $username);
     }
 
     public static function update(PDO $pdo, string $userId, ?string $username, mixed $fullNameProvided, ?string $fullName, ?string $avatarUrl = null): ?array
@@ -125,5 +136,10 @@ final class ProfileService
         $stmt = $pdo->prepare($sql);
         $stmt->execute(['id' => $id]);
         return (int) $stmt->fetchColumn();
+    }
+
+    private static function isUuid(string $value): bool
+    {
+        return (bool) preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i', $value);
     }
 }

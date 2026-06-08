@@ -25,9 +25,20 @@ final class AuthController
 
         try {
             $data = SupabaseService::authSignUp($email, $password, $username);
+            self::ensureUserProfile($data['user'] ?? null);
             Response::json(['message' => 'OTP has been sent to your email. Please verify to complete registration.', 'data' => $data], 201);
         } catch (\Throwable $e) {
-            Response::json(['error' => $e->getMessage()], 400);
+            $message = strtolower($e->getMessage());
+            $isRateLimited = str_contains($message, 'rate limit');
+            $isEmailSendError = str_contains($message, 'sending confirmation email');
+
+            Response::json([
+                'error' => $isRateLimited
+                    ? 'Terlalu banyak permintaan email. Silakan coba lagi nanti.'
+                    : ($isEmailSendError
+                        ? 'Gagal mengirim email OTP. Periksa konfigurasi SMTP Supabase.'
+                        : $e->getMessage()),
+            ], $isRateLimited ? 429 : ($isEmailSendError ? 502 : 400));
         }
     }
 
@@ -41,6 +52,7 @@ final class AuthController
                 return;
             }
 
+            self::ensureUserProfile($result['user'] ?? null);
             self::setAuthCookies($result['access_token'], $result['refresh_token']);
             Response::json([
                 'message' => 'Login successful',
@@ -115,17 +127,18 @@ final class AuthController
 
         try {
             $result = SupabaseService::authVerifyOtp($email, $token);
-            if (isset($result['user']['id'])) {
-                $pdo = Database::connection();
-                $uid = $result['user']['id'];
-                $username = (string) ($result['user']['user_metadata']['username'] ?? ('User_' . substr($uid, 0, 5)));
-                $stmt = $pdo->prepare('INSERT INTO profiles (id, username, full_name, updated_at) VALUES (:id,:username,:full_name,NOW()) ON CONFLICT (id) DO UPDATE SET username = EXCLUDED.username, full_name = EXCLUDED.full_name, updated_at = NOW()');
-                $stmt->execute(['id' => $uid, 'username' => $username, 'full_name' => $username]);
-            }
+            self::ensureUserProfile($result['user'] ?? null);
 
             Response::json(['status' => 'success', 'message' => 'Verifikasi berhasil', 'data' => $result], 200);
         } catch (\Throwable $e) {
-            Response::json(['status' => 'error', 'message' => $e->getMessage()], 400);
+            $message = strtolower($e->getMessage());
+            $isOtpError = str_contains($message, 'token') || str_contains($message, 'otp');
+            Response::json([
+                'status' => 'error',
+                'message' => $isOtpError
+                    ? 'Kode OTP tidak valid atau sudah kedaluwarsa. Coba cek ulang kode terbaru di email.'
+                    : $e->getMessage(),
+            ], 400);
         }
     }
 
@@ -153,5 +166,34 @@ final class AuthController
         $sameSite = 'Lax';
         setcookie('access_token', $access, ['expires' => time() + 604800, 'path' => '/', 'httponly' => true, 'secure' => $secure, 'samesite' => $sameSite]);
         setcookie('refresh_token', $refresh, ['expires' => time() + 604800, 'path' => '/', 'httponly' => true, 'secure' => $secure, 'samesite' => $sameSite]);
+    }
+
+    private static function ensureUserProfile(?array $user): ?array
+    {
+        if (!isset($user['id'])) return null;
+
+        $pdo = Database::connection();
+        $stmt = $pdo->prepare('SELECT id, username, full_name, avatar_url, updated_at FROM profiles WHERE id=:id LIMIT 1');
+        $stmt->execute(['id' => $user['id']]);
+        $existing = $stmt->fetch();
+        if ($existing) return $existing;
+
+        $email = (string) ($user['email'] ?? '');
+        $metadata = is_array($user['user_metadata'] ?? null) ? $user['user_metadata'] : [];
+        $username = (string) (
+            $metadata['username']
+            ?? ($email !== '' ? explode('@', $email)[0] : '')
+            ?: ('User_' . substr((string) $user['id'], 0, 5))
+        );
+
+        $insert = $pdo->prepare('INSERT INTO profiles (id, username, full_name, updated_at) VALUES (:id,:username,:full_name,NOW()) RETURNING id, username, full_name, avatar_url, updated_at');
+        $insert->execute([
+            'id' => $user['id'],
+            'username' => $username,
+            'full_name' => $username,
+        ]);
+
+        $profile = $insert->fetch();
+        return $profile ?: null;
     }
 }

@@ -23,6 +23,16 @@ const NewReleasesSection = () => {
     const container = listRef.current;
     if (!container) return;
     const scrollAmount = container.clientWidth * 0.8;
+    const loopPoint = container.scrollWidth / 2;
+
+    if (direction === "left" && loopPoint > 0 && container.scrollLeft < scrollAmount) {
+      container.scrollLeft += loopPoint;
+    }
+
+    if (direction === "right" && loopPoint > 0 && container.scrollLeft >= loopPoint) {
+      container.scrollLeft -= loopPoint;
+    }
+
     container.scrollBy({
       left: direction === "left" ? -scrollAmount : scrollAmount,
       behavior: "smooth",

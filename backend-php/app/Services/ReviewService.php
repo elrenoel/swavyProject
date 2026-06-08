@@ -45,7 +45,7 @@ final class ReviewService
 
         $count = (int) $pdo->query('SELECT COUNT(*) FROM reviews')->fetchColumn();
         return [
-            'reviews' => self::attachLiked($pdo, $rows, $viewerId),
+            'reviews' => self::attachLiked($pdo, self::attachCurrentUsernames($pdo, $rows), $viewerId),
             'total' => $count,
         ];
     }
@@ -55,7 +55,7 @@ final class ReviewService
         $stmt = $pdo->prepare('SELECT ' . self::SELECT . ' FROM reviews WHERE track_id=:track ORDER BY likes_count DESC, created_at DESC');
         $stmt->execute(['track' => $trackId]);
         $rows = $stmt->fetchAll();
-        return ['reviews' => self::attachLiked($pdo, $rows, $viewerId)];
+        return ['reviews' => self::attachLiked($pdo, self::attachCurrentUsernames($pdo, $rows), $viewerId)];
     }
 
     public static function getPopular(PDO $pdo, int $limit, string $since): array
@@ -64,7 +64,7 @@ final class ReviewService
         $stmt->bindValue(':since', $since);
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
-        return ['reviews' => $stmt->fetchAll()];
+        return ['reviews' => self::attachCurrentUsernames($pdo, $stmt->fetchAll())];
     }
 
     public static function toggleLike(PDO $pdo, string $reviewId, string $userId): ?array
@@ -88,7 +88,9 @@ final class ReviewService
             $ins = $pdo->prepare('INSERT INTO review_likes (review_id, user_id) VALUES (:rid,:uid) ON CONFLICT DO NOTHING');
             $ins->execute(['rid' => $reviewId, 'uid' => $userId]);
             $liked = true;
-            $likes += 1;
+            if ($ins->rowCount() > 0) {
+                $likes += 1;
+            }
         }
 
         $upd = $pdo->prepare('UPDATE reviews SET likes_count=:likes WHERE id=:id');
@@ -112,5 +114,30 @@ final class ReviewService
         $set = array_flip($likedIds);
 
         return array_map(fn ($r) => [...$r, 'liked_by_me' => isset($set[$r['id']])], $rows);
+    }
+
+    private static function attachCurrentUsernames(PDO $pdo, array $rows): array
+    {
+        if (!$rows) return [];
+
+        $userIds = array_values(array_unique(array_filter(array_column($rows, 'user_id'))));
+        if (!$userIds) return $rows;
+
+        $placeholders = implode(',', array_fill(0, count($userIds), '?'));
+        $stmt = $pdo->prepare('SELECT id, username FROM profiles WHERE id IN (' . $placeholders . ')');
+        $stmt->execute($userIds);
+
+        $usernameByUserId = [];
+        foreach ($stmt->fetchAll() as $profile) {
+            $usernameByUserId[$profile['id']] = $profile['username'];
+        }
+
+        return array_map(function ($row) use ($usernameByUserId) {
+            if (isset($usernameByUserId[$row['user_id']])) {
+                $row['username'] = $usernameByUserId[$row['user_id']];
+            }
+
+            return $row;
+        }, $rows);
     }
 }

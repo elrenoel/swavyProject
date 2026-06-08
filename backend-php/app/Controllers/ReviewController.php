@@ -30,9 +30,11 @@ final class ReviewController
         $b = $request->json();
         $trackId = (string) ($b['track_id'] ?? $b['trackId'] ?? '');
         $title = (string) ($b['title'] ?? '');
-        $rating = (int) ($b['rating'] ?? 0);
+        $ratingRaw = $b['rating'] ?? null;
 
         if ($trackId === '' || $title === '') { Response::json(['error' => 'track_id (or trackId) and title are required'], 400); return; }
+        if (!is_numeric($ratingRaw)) { Response::json(['error' => 'Rating must be 1-5'], 400); return; }
+        $rating = (int) $ratingRaw;
         if ($rating < 1 || $rating > 5) { Response::json(['error' => 'Rating must be 1-5'], 400); return; }
 
         $payload = [
@@ -46,7 +48,7 @@ final class ReviewController
             'artist' => $b['artist'] ?? null,
             'image_url' => $b['image_url'] ?? $b['imageUrl'] ?? null,
             'rating' => $rating,
-            'content' => $b['content'] ?? null,
+            'content' => !empty($b['content']) ? (string) $b['content'] : null,
         ];
 
         try {
@@ -61,11 +63,13 @@ final class ReviewController
     public static function updateReview(Request $request): void
     {
         $b = $request->json();
-        $rating = (int) ($b['rating'] ?? 0);
+        $ratingRaw = $b['rating'] ?? null;
+        if (!is_numeric($ratingRaw)) { Response::json(['error' => 'Rating must be 1-5'], 400); return; }
+        $rating = (int) $ratingRaw;
         if ($rating < 1 || $rating > 5) { Response::json(['error' => 'Rating must be 1-5'], 400); return; }
 
         try {
-            $review = ReviewService::update(Database::connection(), (string) $request->params['id'], (string) $request->user['id'], $rating, isset($b['content']) ? (string) $b['content'] : null);
+            $review = ReviewService::update(Database::connection(), (string) $request->params['id'], (string) $request->user['id'], $rating, !empty($b['content']) ? (string) $b['content'] : null);
             Response::json(['review' => $review], 200);
         } catch (\Throwable $e) { Response::json(['error' => $e->getMessage()], 500); }
     }

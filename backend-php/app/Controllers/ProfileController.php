@@ -41,6 +41,17 @@ final class ProfileController
         Response::json(['profile' => $profile, 'isFollowing' => $isFollowing, 'isMe' => $isMe]);
     }
 
+    public static function getMyProfile(Request $request): void
+    {
+        $profile = ProfileService::getById(Database::connection(), (string) $request->user['id']);
+        if (!$profile) {
+            Response::json(['error' => 'Profile not found'], 404);
+            return;
+        }
+
+        Response::json(['profile' => $profile]);
+    }
+
     public static function getProfileStats(Request $request): void
     {
         $pdo = Database::connection();

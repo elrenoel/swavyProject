@@ -42,6 +42,7 @@ $router->add('POST', '/api/reviews', [ReviewController::class, 'createReview'], 
 $router->add('PUT', '/api/reviews/:id', [ReviewController::class, 'updateReview'], [[AuthMiddleware::class, 'handle']]);
 $router->add('POST', '/api/reviews/:id/like', [ReviewController::class, 'toggleReviewLike'], [[AuthMiddleware::class, 'handle']]);
 
+$router->add('GET', '/api/profiles/me', [ProfileController::class, 'getMyProfile'], [[AuthMiddleware::class, 'handle']]);
 $router->add('GET', '/api/profiles/:username', [ProfileController::class, 'getProfileByUsername']);
 $router->add('GET', '/api/profiles/:username/stats', [ProfileController::class, 'getProfileStats']);
 $router->add('GET', '/api/profiles/:username/top-picks', [ProfileController::class, 'getProfileTopPicks']);
