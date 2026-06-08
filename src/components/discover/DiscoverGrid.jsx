@@ -5,15 +5,17 @@ const DiscoverGrid = ({ tracks = [], loading, activeTab }) => {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 sm:w-150 md:w-200 lg:w-300">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {skeletons.map((_, index) => (
           <div
             key={`discover-skeleton-${index}`}
-            className="space-y-3 rounded-xl animate-pulse"
+            className="overflow-hidden rounded-2xl border border-gray-100 bg-white"
           >
-            <div className="h-65 w-full rounded-xl bg-gray-200" />
-            <div className="h-4 w-3/4 rounded bg-gray-200" />
-            <div className="h-3 w-1/2 rounded bg-gray-200" />
+            <div className="aspect-[4/3] w-full animate-pulse bg-gray-100" />
+            <div className="space-y-2 p-4">
+              <div className="h-4 w-3/4 animate-pulse rounded bg-gray-100" />
+              <div className="h-3 w-1/2 animate-pulse rounded bg-gray-100" />
+            </div>
           </div>
         ))}
       </div>
@@ -21,7 +23,14 @@ const DiscoverGrid = ({ tracks = [], loading, activeTab }) => {
   }
 
   if (!tracks.length) {
-    return <p className="text-center text-gray-400">No results</p>;
+    return (
+      <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center">
+        <p className="text-sm font-medium text-gray-600">No results found</p>
+        <p className="mt-1 text-sm text-gray-400">
+          Try another mood or category.
+        </p>
+      </div>
+    );
   }
 
   let sorted = [...tracks];
@@ -41,7 +50,7 @@ const DiscoverGrid = ({ tracks = [], loading, activeTab }) => {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {sorted.map((track, index) => (
         <DiscoverCard key={track.id} track={track} rank={index + 1} />
       ))}

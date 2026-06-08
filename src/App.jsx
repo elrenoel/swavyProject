@@ -43,8 +43,14 @@ function App() {
                 }
               >
                 <Route path="/discover" element={<Discover />} />
-                <Route path="/album/:id" element={<AlbumDetail />} />
-                <Route path="/track/:id" element={<TrackDetail />} />
+                <Route
+                  path="/album/:id"
+                  element={<AlbumDetail setCurrentTrack={setCurrentTrack} />}
+                />
+                <Route
+                  path="/track/:id"
+                  element={<TrackDetail setCurrentTrack={setCurrentTrack} />}
+                />
                 <Route path="/list" element={<List />} />
                 <Route
                   path="/list/:id"

@@ -6,7 +6,6 @@ const ReviewCard = ({
   artist,
   rating,
   snippet,
-  isGray,
   image,
   trackId,
 }) => {
@@ -22,10 +21,10 @@ const ReviewCard = ({
   return (
     <div className="flex items-start gap-4 group cursor-pointer w-full min-w-0">
       {/* Cover Album Kecil */}
-      <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-200 rounded shrink-0 flex items-center justify-center text-xs text-gray-400 group-hover:scale-105 transition">
+      <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-200 rounded-lg shrink-0 flex items-center justify-center text-xs text-gray-400 group-hover:scale-105 transition">
         <a href={`../track/${trackId}`}>
           <img
-            className="w-full h-full object-cover rounded-md"
+            className="w-full h-full object-cover rounded-lg"
             src={image || album}
             alt=""
           />
@@ -34,21 +33,23 @@ const ReviewCard = ({
 
       {/* Info Ulasan */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-1 gap-4">
-          <div>
-            <h4 className="text-sm font-bold text-gray-900 leading-none mb-1 line-clamp-2 overflow-hidden break-all">
+        <div className="flex items-start justify-between mb-2 gap-3">
+          <div className="min-w-0">
+            <h4 className="text-sm sm:text-base font-bold text-gray-900 leading-snug line-clamp-2 overflow-hidden break-words">
               {title}
             </h4>
-            <p className="text-xs text-gray-500 truncate">{artist}</p>
+            <p className="text-xs sm:text-sm text-gray-500 truncate mt-1">
+              {artist}
+            </p>
           </div>
           {/* Badge Rating */}
           <span
-            className={`px-1.5 py-0.5 rounded text-[10px] font-bold text-white ${ratingClass}`}
+            className={`shrink-0 px-2 py-1 rounded-md text-[11px] font-bold text-white ${ratingClass}`}
           >
             {ratingValue || rating}
           </span>
         </div>
-        <p className="text-xs text-gray-500 italic line-clamp-2 overflow-hidden break-all">
+        <p className="text-xs sm:text-sm text-gray-500 italic leading-relaxed line-clamp-2 overflow-hidden break-words">
           {snippet}
         </p>
       </div>

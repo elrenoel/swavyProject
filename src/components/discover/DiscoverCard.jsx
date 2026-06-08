@@ -1,43 +1,40 @@
+import { useNavigate } from "react-router-dom";
+
 const DiscoverCard = ({ track, rank }) => {
+  const navigate = useNavigate();
+  const image = track.album.images[0]?.url;
+  const artists = track.artists.map((artist) => artist.name).join(", ");
+
   return (
-    <div
+    <button
+      type="button"
+      onClick={() => navigate(`/track/${track.id}`)}
       className={`
-        space-y-3 cursor-pointer group relative rounded-xl
-        ${rank <= 3 ? "ring-2 ring-green-500" : ""}
-        ${rank === 1 ? "bg-yellow-500/10" : ""}
-        ${rank === 2 ? "bg-gray-400/10" : ""}
-        ${rank === 3 ? "bg-orange-500/10" : ""}
+        group relative overflow-hidden rounded-2xl border bg-white text-left transition
+        ${rank <= 3 ? "border-green-500" : "border-gray-100 hover:border-gray-300"}
       `}
     >
-      {/* 🔥 RANK BADGE */}
-      <div className="absolute top-3 left-3 z-10">
-        <span
-          className="
-          bg-black/80 text-white text-xs px-2 py-1 rounded
-          font-semibold
-        "
-        >
+      <div className="absolute left-3 top-3 z-10">
+        <span className="rounded-md bg-black/80 px-2 py-1 text-xs font-semibold text-white">
           #{rank}
         </span>
       </div>
 
-      {/* IMAGE */}
-      <div className="overflow-hidden rounded-xl">
+      <div className="aspect-[4/3] overflow-hidden bg-gray-100">
         <img
-          src={track.album.images[0]?.url}
-          className="w-full h-65 object-cover group-hover:scale-105 transition"
+          src={image}
+          className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+          alt=""
         />
       </div>
 
-      {/* INFO */}
-      <div className="px-2 pb-2">
-        <h3 className="text-lg font-medium line-clamp-1">{track.name}</h3>
-
-        <p className="text-sm text-gray-500 line-clamp-1">
-          {track.artists.map((a) => a.name).join(", ")}
-        </p>
+      <div className="p-4">
+        <h3 className="line-clamp-1 text-base font-semibold text-gray-950 md:text-lg">
+          {track.name}
+        </h3>
+        <p className="mt-1 line-clamp-1 text-sm text-gray-500">{artists}</p>
       </div>
-    </div>
+    </button>
   );
 };
 

@@ -19,30 +19,28 @@ import {
   uploadProfileAvatar,
 } from "../../services/profile";
 
+const profileShellClassName =
+  "mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 md:min-w-[900px] md:px-10 md:py-12 lg:min-w-[1120px]";
+
 const ProfileSkeleton = () => (
-  <section
-    className="px-4 md:px-8 lg:px-12
-  py-10 md:py-16
-  space-y-12 md:space-y-20
-  max-w-7xl mx-auto"
-  >
+  <section className={`${profileShellClassName} space-y-10`}>
     <div className="text-center space-y-4 animate-pulse">
-      <div className="w-20 h-20 rounded-full bg-gray-200 mx-auto" />
+      <div className="mx-auto h-20 w-20 rounded-full bg-gray-200 md:h-24 md:w-24" />
       <div className="space-y-2">
-        <div className="h-6 w-40 bg-gray-200 mx-auto rounded" />
-        <div className="h-4 w-24 bg-gray-200 mx-auto rounded" />
+        <div className="mx-auto h-8 w-48 rounded bg-gray-200" />
+        <div className="mx-auto h-4 w-24 rounded bg-gray-200" />
       </div>
-      <div className="h-9 w-32 bg-gray-200 mx-auto rounded-full" />
+      <div className="mx-auto h-12 w-36 rounded-full bg-gray-200" />
     </div>
 
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 animate-pulse">
+    <div className="grid grid-cols-2 gap-3 animate-pulse md:grid-cols-4 md:gap-5">
       {Array.from({ length: 4 }).map((_, index) => (
         <div
           key={`stat-skeleton-${index}`}
-          className="border border-gray-200 rounded-xl p-5 bg-white"
+          className="rounded-xl border border-gray-200 bg-white p-3 md:p-5"
         >
-          <div className="h-6 w-16 bg-gray-200 mx-auto rounded" />
-          <div className="h-3 w-20 bg-gray-200 mx-auto mt-3 rounded" />
+          <div className="mx-auto h-7 w-16 rounded bg-gray-200" />
+          <div className="mx-auto mt-3 h-3 w-24 rounded bg-gray-200" />
         </div>
       ))}
     </div>
@@ -52,10 +50,10 @@ const ProfileSkeleton = () => (
         <div className="h-5 w-24 bg-gray-200 rounded" />
         <div className="h-4 w-16 bg-gray-200 rounded" />
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
         {Array.from({ length: 4 }).map((_, index) => (
           <div key={`top-pick-skeleton-${index}`} className="space-y-2">
-            <div className="w-full h-32 bg-gray-200 rounded-lg" />
+            <div className="h-30 w-full rounded-lg bg-gray-200 sm:h-35 md:h-40" />
             <div className="h-3 w-24 bg-gray-200 rounded" />
             <div className="h-3 w-16 bg-gray-200 rounded" />
           </div>
@@ -65,7 +63,7 @@ const ProfileSkeleton = () => (
 
     <div className="space-y-4 animate-pulse">
       <div className="h-4 w-32 bg-gray-200 rounded" />
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-4 md:gap-5">
         {Array.from({ length: 4 }).map((_, index) => (
           <div key={`collection-skeleton-${index}`} className="space-y-2">
             <div className="w-full aspect-square bg-gray-200 rounded-lg" />
@@ -245,12 +243,7 @@ const ProfileSection = ({ username }) => {
   }
 
   return (
-    <section
-      className="px-4 md:px-8 lg:px-12
-  py-10 md:py-16
-  space-y-12 md:space-y-20
-  max-w-7xl mx-auto"
-    >
+    <section className={`${profileShellClassName} space-y-10`}>
       <ProfileHeader
         profile={profile}
         isOwnProfile={isOwnProfile}

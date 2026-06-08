@@ -9,24 +9,27 @@ const CommunitySection = () => {
 
   return (
     <section
-      className="px-4 md:px-10 
-  py-10 md:py-12
-  w-full mx-auto flex flex-col md:flex-row
-  gap-8 md:gap-10"
+      className="
+        w-full max-w-7xl mx-auto
+        px-4 sm:px-6 md:px-10
+        py-8 md:py-12
+        grid grid-cols-1 lg:grid-cols-[160px_minmax(0,1fr)_280px]
+        gap-6 lg:gap-8
+      "
     >
       {/* LEFT */}
-      <div className="md:flex-1">
+      <aside className="lg:pt-24">
         <CommunityTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-      </div>
+      </aside>
       {/* CENTER */}
-      <div className="md:flex-3">
+      <main className="min-w-0">
         <CommunityHeader />
         <CommunityFeed activeTab={activeTab} />
-      </div>
+      </main>
       {/* RIGHT */}
-      <div className="flex-1">
+      <aside className="min-w-0 lg:pt-24">
         <CommunitySidebar />
-      </div>
+      </aside>
     </section>
   );
 };

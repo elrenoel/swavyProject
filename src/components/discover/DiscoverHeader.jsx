@@ -1,20 +1,15 @@
 const DiscoverHeader = () => {
   return (
-    <div className="max-w-xl md:max-w-2xl mb-10 md:mb-12">
-      <p className="text-xs text-green-600 tracking-widest mb-3 md:mb-4">
+    <div className="mb-8 max-w-xl md:mb-10 md:max-w-2xl">
+      <p className="mb-3 text-xs font-medium tracking-widest text-green-600">
         ARCHIVE VOL. 03
       </p>
 
-      <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl
-        font-['Newsreader']
-        leading-tight">
+      <h1 className="font-['Newsreader'] text-4xl leading-tight text-gray-950 sm:text-5xl md:text-6xl">
         Discover the <br /> New Vibrations
       </h1>
 
-      <p className="font-['Manrope'] text-sm md:text-base
-        text-gray-500
-        mt-4 mb-6
-        max-w-md">
+      <p className="mt-5 max-w-lg font-['Manrope'] text-sm leading-relaxed text-gray-500 md:text-base">
         A curated selection of sonic explorations, ranging from ambient
         soundscapes to neoclassical reinventions.
       </p>

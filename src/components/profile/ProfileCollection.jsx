@@ -10,16 +10,16 @@ const ProfileCollection = ({ lists = [], total = 0 }) => {
   const hasMore = total > 4 && !showAll;
 
   return (
-    <div>
-      <div
-        className="flex flex-col sm:flex-row
-    sm:justify-between
-    gap-3
-    mb-4"
-      >
-        <h2 className="text-sm md:text-base font-semibold">
-          RECENT COLLECTION
-        </h2>
+    <section className="space-y-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-green-600">
+            Lists
+          </p>
+          <h2 className="text-lg font-semibold text-gray-950 md:text-xl">
+            Recent Collection
+          </h2>
+        </div>
       </div>
 
       <CuratedGrid
@@ -33,17 +33,13 @@ const ProfileCollection = ({ lists = [], total = 0 }) => {
         <div className="text-center mt-8">
           <button
             onClick={() => setShowAll(true)}
-            className="px-4 md:px-6
-  py-2
-  border
-  rounded-full
-  text-xs md:text-sm"
+            className="rounded-full border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-600 transition hover:border-gray-300 hover:text-gray-950"
           >
-            LOAD ENTIRE COLLECTION
+            Load Entire Collection
           </button>
         </div>
       ) : null}
-    </div>
+    </section>
   );
 };
 

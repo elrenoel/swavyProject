@@ -3,7 +3,6 @@ import { getDiscover } from "../../services/spotify";
 import DiscoverGrid from "../discover/DiscoverGrid";
 import DiscoverHeader from "../discover/DiscoverHeader";
 import DiscoverFilter from "../discover/DiscoverFilter";
-import DiscoverLoadMore from "../discover/DiscoverLoadMore";
 import DiscoverTabs from "../discover/DiscoverTabs";
 
 const DiscoverSection = () => {
@@ -61,12 +60,13 @@ const DiscoverSection = () => {
   }, [keyword]);
 
   return (
-    <section className="px-4 md:px-8 lg:px-12 py-12 md:py-20 max-w-7xl mx-auto flex flex-col w-full">
+    <section className="mx-auto flex w-full max-w-7xl flex-col px-4 py-8 sm:px-6 md:px-10 md:py-12">
       <DiscoverHeader />
-      <DiscoverTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-      <DiscoverFilter setKeyword={setKeyword} />
+      <div className="mb-8 flex flex-col gap-4 border-y border-gray-100 py-4 lg:flex-row lg:items-center lg:justify-between">
+        <DiscoverTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+        <DiscoverFilter keyword={keyword} setKeyword={setKeyword} />
+      </div>
       <DiscoverGrid tracks={tracks} loading={loading} activeTab={activeTab} />
-      <DiscoverLoadMore />
     </section>
   );
 };

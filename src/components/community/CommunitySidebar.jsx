@@ -3,8 +3,8 @@ import CommunityEditorsNote from "./CommunityEditorsNote";
 
 const CommunitySidebar = () => {
   return (
-    <div className="space-y-6 mt-8 md:mt-0">
-      <CommunityTopUsers />
+    <div className="space-y-6">
+      {/* <CommunityTopUsers /> */}
       <CommunityEditorsNote />
     </div>
   );

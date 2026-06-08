@@ -6,29 +6,40 @@ const EmbedPlayer = ({ trackId, onClose }) => {
   return (
     <div
       className="
-      fixed bottom-0 left-0 w-full
-      bg-black p-2 z-50
-    "
+        fixed inset-x-0 bottom-0 z-50
+        px-3 pb-3 sm:px-5 sm:pb-5
+      "
     >
-      <div className="text-white flex justify-end mb-2">
+      <div
+        className="
+          relative mx-auto max-w-4xl overflow-hidden
+          rounded-2xl border border-black/10 bg-black
+          p-2
+        "
+      >
         <button
           type="button"
           onClick={onClose}
-          className="p-1 rounded-full hover:bg-white/10"
+          className="
+            absolute right-3 top-3 z-10
+            inline-flex h-8 w-8 items-center justify-center
+            rounded-full bg-black/65 text-white backdrop-blur
+            transition hover:bg-black
+          "
           aria-label="Close player"
         >
-          <IoClose size={25} />
+          <IoClose size={20} />
         </button>
-      </div>
 
-      <iframe
-        src={`https://open.spotify.com/embed/track/${trackId}?autoplay=1`}
-        width="100%"
-        height="100"
-        frameBorder="0"
-        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-        loading="lazy"
-      ></iframe>
+        <iframe
+          title="Spotify player"
+          src={`https://open.spotify.com/embed/track/${trackId}?autoplay=1`}
+          className="block h-20 w-full rounded-xl sm:h-24"
+          frameBorder="0"
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          loading="lazy"
+        ></iframe>
+      </div>
     </div>
   );
 };

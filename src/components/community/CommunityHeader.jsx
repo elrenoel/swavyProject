@@ -1,11 +1,9 @@
 const CommunityHeader = () => {
   return (
-    <div className="mb-4 md:mb-6">
-      <h1 className="text-2xl sm:text-3xl md:text-4xl
-    font-['Newsreader']">Community</h1>
-      <p className="text-gray-400 text-xs sm:text-sm mt-2">
-        Activity from curators you follow
-      </p>
+    <div className="mb-5 md:mb-7">
+      <h1 className="text-3xl sm:text-4xl md:text-5xl font-['Newsreader'] leading-tight">
+        Community
+      </h1>
     </div>
   );
 };

@@ -11,17 +11,18 @@ const ProfileAllReviews = ({ reviews, isOwnProfile, onBack }) => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4 mb-8">
+    <div className="mx-auto w-full max-w-4xl md:min-w-[720px] lg:min-w-[820px]">
+      <div className="mb-6 flex items-center justify-between gap-4">
         <button
+          type="button"
           onClick={onBack}
-          className="text-gray-500 hover:text-black font-semibold text-sm flex items-center gap-2"
+          className="rounded-full px-3 py-2 text-sm font-medium text-gray-500 transition hover:bg-gray-100 hover:text-gray-950"
         >
-          ← BACK TO PROFILE
+          Back to Profile
         </button>
       </div>
 
-      <h2 className="text-xl md:text-2xl font-bold font-['Newsreader'] mb-6">
+      <h2 className="mb-6 font-['Newsreader'] text-3xl font-bold text-gray-950">
         All Reviews
       </h2>
 
@@ -30,7 +31,7 @@ const ProfileAllReviews = ({ reviews, isOwnProfile, onBack }) => {
           {reviews.map((review) => (
             <div
               key={review.id}
-              className="p-4 border rounded-xl hover:bg-gray-50 transition"
+              className="rounded-2xl border border-gray-200 bg-white p-4 transition hover:border-gray-300"
             >
               <ReviewCard
                 title={review.title}
@@ -40,24 +41,27 @@ const ProfileAllReviews = ({ reviews, isOwnProfile, onBack }) => {
                 image={review.image_url}
                 trackId={review.track_id}
               />
-              {isOwnProfile && (
-                <div className="flex justify-end mt-2">
+              {isOwnProfile ? (
+                <div className="mt-3 flex justify-end border-t border-gray-100 pt-3">
                   <button
+                    type="button"
                     onClick={() => handleReviewClick(review)}
-                    className="text-sm text-gray-500 underline cursor-pointer"
+                    className="rounded-full px-3 py-2 text-sm font-medium text-gray-500 transition hover:bg-gray-100 hover:text-gray-950"
                   >
-                    update review
+                    Update Review
                   </button>
                 </div>
-              )}
+              ) : null}
             </div>
           ))}
         </div>
       ) : (
-        <p className="text-sm text-gray-400">No reviews yet.</p>
+        <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-8 text-sm text-gray-400">
+          No reviews yet.
+        </div>
       )}
 
-      {editingReview && isOwnProfile && (
+      {editingReview && isOwnProfile ? (
         <ReviewModal
           track={{
             id: editingReview.track_id,
@@ -70,7 +74,7 @@ const ProfileAllReviews = ({ reviews, isOwnProfile, onBack }) => {
           }}
           onClose={() => setEditingReview(null)}
         />
-      )}
+      ) : null}
     </div>
   );
 };

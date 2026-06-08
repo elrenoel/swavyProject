@@ -6,16 +6,18 @@ const tabs = [
 
 const DiscoverTabs = ({ activeTab, setActiveTab }) => {
   return (
-    <div className="flex gap-3 mb-6 flex-wrap">
+    <div className="flex flex-wrap gap-2">
       {tabs.map((tab) => (
         <button
           key={tab.key}
           onClick={() => setActiveTab(tab.key)}
           className={`
-            px-4 py-2 rounded-full text-sm
-            ${activeTab === tab.key
-              ? "bg-green-500 text-white"
-              : "bg-gray-100 text-gray-600"}
+            rounded-full px-4 py-2 text-sm font-medium transition
+            ${
+              activeTab === tab.key
+                ? "bg-green-500 text-white"
+                : "bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-900"
+            }
           `}
         >
           {tab.label}

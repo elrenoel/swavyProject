@@ -2,6 +2,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useReviews } from "../../context/ReviewContext";
 import ReviewCard from "../sections/CuratedEditorial/ReviewCard";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { FiExternalLink } from "react-icons/fi";
 
 const CommunityFeed = ({ activeTab }) => {
   const { user } = useAuth();
@@ -15,46 +16,45 @@ const CommunityFeed = ({ activeTab }) => {
   } = useReviews();
 
   if (activeTab !== "fresh") {
-    return (
-      <div className="text-sm text-gray-400 mt-6">
-        Belum ada konten untuk tab ini.
-      </div>
-    );
+    return <EmptyState text="Belum ada konten untuk tab ini." />;
   }
 
   if (isLoading) {
-    return <div className="text-sm text-gray-400 mt-6">Loading...</div>;
+    return <EmptyState text="Loading..." />;
   }
 
   if (!pagedReviews.length) {
-    return (
-      <div className="text-sm text-gray-400 mt-6">
-        Belum ada review terbaru.
-      </div>
-    );
+    return <EmptyState text="Belum ada review terbaru." />;
   }
 
   return (
-    <div className="space-y-6 mt-4">
-      {pagedReviews.map((review, index) => (
-        <div key={review.id} className="p-5 border border-gray-400 rounded-lg">
+    <div className="space-y-4">
+      {pagedReviews.map((review) => (
+        <article
+          key={review.id}
+          className="
+            rounded-xl border border-gray-200 bg-white p-4 sm:p-5
+            transition hover:border-gray-300
+          "
+        >
           <ReviewCard
             title={review.title}
             artist={review.artist}
             rating={review.rating ?? 0}
             snippet={review.content || "No review text yet."}
-            isGray={index % 2 === 1}
             image={review.image}
             trackId={review.trackId}
           />
 
-          <div className="mt-3 flex items-center justify-between">
-            <div className="text-xs text-gray-400 flex items-center gap-1">
-              @{review.username || "anonymous"} -
-              <a href={`../profile/${review.username}`}>
-                <div className="text-blue-300 text-xs font-normal">
-                  view profile
-                </div>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-3">
+            <div className="min-w-0 text-xs text-gray-400">
+              <span>@{review.username || "anonymous"}</span>
+              <a
+                href={`../profile/${review.username}`}
+                className="ml-2 inline-flex items-center gap-1 font-medium text-green-600 hover:text-green-700"
+              >
+                view profile
+                <FiExternalLink size={12} />
               </a>
             </div>
             <button
@@ -83,7 +83,7 @@ const CommunityFeed = ({ activeTab }) => {
               <span className="text-sm">{review.likes}</span>
             </button>
           </div>
-        </div>
+        </article>
       ))}
 
       {totalPages > 1 ? (
@@ -108,5 +108,11 @@ const CommunityFeed = ({ activeTab }) => {
     </div>
   );
 };
+
+const EmptyState = ({ text }) => (
+  <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50 p-6 text-sm text-gray-400">
+    {text}
+  </div>
+);
 
 export default CommunityFeed;
