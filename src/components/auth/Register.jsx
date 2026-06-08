@@ -3,10 +3,12 @@ import { HiOutlineMail, HiOutlineUser } from "react-icons/hi";
 import { RiEyeCloseLine, RiEyeLine } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../../services/api";
+import LoadingSpinner from "./LoadingSpinner";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -23,7 +25,10 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     setErrorMessage("");
+    setIsSubmitting(true);
 
     try {
       const data = await apiFetch("/auth/register", {
@@ -35,7 +40,13 @@ const Register = () => {
       navigate("../verify-otp");
     } catch (error) {
       console.error("Register error:", error);
-      setErrorMessage(error?.message || "Terjadi kesalahan, coba lagi.");
+      setErrorMessage(
+        error?.status === 429
+          ? "Terlalu banyak permintaan email. Silakan coba lagi nanti."
+          : error?.message || "Terjadi kesalahan, coba lagi.",
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -60,6 +71,7 @@ const Register = () => {
                 type="text"
                 name="username"
                 required
+                disabled={isSubmitting}
                 className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-3 focus:border-[#1DB954] focus:outline-none focus:ring-1 focus:ring-[#1DB954]"
                 placeholder="Masukkan username"
                 onChange={handleChange}
@@ -80,6 +92,7 @@ const Register = () => {
                 type="email"
                 name="email"
                 required
+                disabled={isSubmitting}
                 className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-3 focus:border-[#1DB954] focus:outline-none focus:ring-1 focus:ring-[#1DB954]"
                 placeholder="nama@email.com"
                 onChange={handleChange}
@@ -97,12 +110,14 @@ const Register = () => {
                 type={showPassword ? "text" : "password"}
                 name="password"
                 required
+                disabled={isSubmitting}
                 className="w-full rounded-lg border border-gray-300 py-2.5 pl-3 pr-10 focus:border-[#1DB954] focus:outline-none focus:ring-1 focus:ring-[#1DB954]"
                 placeholder="••••••••"
                 onChange={handleChange}
               />
               <button
                 type="button"
+                disabled={isSubmitting}
                 className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-blue-600"
                 onClick={() => setShowPassword(!showPassword)}
               >
@@ -123,9 +138,10 @@ const Register = () => {
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-[#1DB954] py-3 font-semibold text-white transition duration-200 hover:bg-[#1DB345] active:scale-95"
+            disabled={isSubmitting}
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#1DB954] py-3 font-semibold text-white transition duration-200 hover:bg-[#1DB345] active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            Register
+            {isSubmitting ? <LoadingSpinner /> : "Register"}
           </button>
         </form>
 

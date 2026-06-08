@@ -5,18 +5,20 @@ const ProfileHeader = ({
   onEdit,
   onFollow,
 }) => {
+  const defaultAvatarUrl = "/placeholder.jpg";
   const displayName = profile?.full_name || profile?.username || "User";
   const username = profile?.username || "username";
   const avatarUrl = profile?.avatar_url
     ? `${profile.avatar_url}${
         profile.updated_at ? `?t=${new Date(profile.updated_at).getTime()}` : ""
       }`
-    : "https://i.pravatar.cc/100";
+    : defaultAvatarUrl;
 
   return (
     <div className="text-center space-y-3 md:space-y-4">
       <img
         src={avatarUrl}
+        alt={`${displayName} avatar`}
         className="w-16 h-16 md:w-20 md:h-20 rounded-full mx-auto"
       />
 

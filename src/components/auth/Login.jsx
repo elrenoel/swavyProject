@@ -4,10 +4,12 @@ import { RiEyeCloseLine, RiEyeLine } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
+import LoadingSpinner from "./LoadingSpinner";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
@@ -24,7 +26,10 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     setErrorMessage("");
+    setIsSubmitting(true);
 
     try {
       const data = await apiFetch("/auth/login", {
@@ -39,6 +44,8 @@ const Login = () => {
     } catch (error) {
       console.error("Login error:", error);
       setErrorMessage(error?.message || "Terjadi kesalahan, coba lagi.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -66,6 +73,7 @@ const Login = () => {
                 type="email"
                 name="email"
                 required
+                disabled={isSubmitting}
                 className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-3 focus:border-[#1DB954] focus:outline-none focus:ring-1 focus:ring-[#1DB954]"
                 placeholder="nama@email.com"
                 onChange={handleChange}
@@ -91,12 +99,14 @@ const Login = () => {
                 type={showPassword ? "text" : "password"}
                 name="password"
                 required
+                disabled={isSubmitting}
                 className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-10 focus:border-[#1DB954] focus:outline-none focus:ring-1 focus:ring-[#1DB954]"
                 placeholder="••••••••"
                 onChange={handleChange}
               />
               <button
                 type="button"
+                disabled={isSubmitting}
                 className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-[#1DB954]"
                 onClick={() => setShowPassword(!showPassword)}
               >
@@ -114,6 +124,7 @@ const Login = () => {
             <input
               id="remember"
               type="checkbox"
+              disabled={isSubmitting}
               className="h-4 w-4 rounded border-gray-300 text-[#1DB954] focus:ring-[#1DB954]"
             />
             <label
@@ -132,9 +143,10 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-[#1DB954] py-3 font-semibold text-white transition duration-200 hover:bg-[#1DB345] active:scale-95"
+            disabled={isSubmitting}
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#1DB954] py-3 font-semibold text-white transition duration-200 hover:bg-[#1DB345] active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            Masuk
+            {isSubmitting ? <LoadingSpinner /> : "Masuk"}
           </button>
         </form>
 

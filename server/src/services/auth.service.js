@@ -1,4 +1,4 @@
-import { supabase } from "../config/supabase.js";
+import { supabase, supabaseAdmin } from "../config/supabase.js";
 /**
  * Logika Sign Up: Mendaftarkan user ke Supabase Auth
  * dan memasukkan data tambahan ke tabel 'profiles'
@@ -8,6 +8,38 @@ import { supabase } from "../config/supabase.js";
  * Step 1: Sign Up
  * Hanya mendaftarkan email & password ke Supabase Auth.
  */
+export async function ensureUserProfile(user) {
+  if (!user?.id) return null;
+
+  const { data: existingProfile, error: existingError } = await supabaseAdmin
+    .from("profiles")
+    .select("id, username, full_name, avatar_url, updated_at")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (existingError) throw existingError;
+  if (existingProfile) return existingProfile;
+
+  const username =
+    user.user_metadata?.username ||
+    user.email?.split("@")[0] ||
+    `User_${user.id.substring(0, 5)}`;
+
+  const { data, error } = await supabaseAdmin
+    .from("profiles")
+    .insert({
+      id: user.id,
+      username,
+      full_name: username,
+      updated_at: new Date().toISOString(),
+    })
+    .select("id, username, full_name, avatar_url, updated_at")
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
 export const signUp = async (email, password, username) => {
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -19,6 +51,8 @@ export const signUp = async (email, password, username) => {
   });
 
   if (error) throw error;
+  await ensureUserProfile(data?.user);
+
   return data;
 };
 
@@ -28,29 +62,20 @@ export const signUp = async (email, password, username) => {
  */
 export const verifyOTP = async (email, token) => {
   try {
+    const normalizedEmail = String(email || "").trim();
+    const normalizedToken = String(token || "").trim();
+
     // 1. Verifikasi OTP ke Supabase Auth
     const { data, error } = await supabase.auth.verifyOtp({
-      email,
-      token,
+      email: normalizedEmail,
+      token: normalizedToken,
       type: "signup",
     });
 
     if (error) throw error;
 
     // 2. Jika verifikasi sukses, sinkronisasi ke tabel profiles
-    if (data?.user) {
-      const { id, user_metadata } = data.user;
-      const username = user_metadata?.username || `User_${id.substring(0, 5)}`;
-
-      const { error: profileError } = await supabase.from("profiles").upsert({
-        id: id,
-        username: username,
-        full_name: username,
-        updated_at: new Date().toISOString(), // Gunakan ISO string untuk DB
-      });
-
-      if (profileError) throw profileError;
-    }
+    await ensureUserProfile(data?.user);
 
     return data;
   } catch (error) {
@@ -87,6 +112,7 @@ export const signIn = async (email, password) => {
   });
 
   if (error) throw error;
+  await ensureUserProfile(data?.user);
 
   return data;
 };

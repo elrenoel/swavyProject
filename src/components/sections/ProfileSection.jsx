@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useLists } from "../../context/ListContext";
@@ -90,8 +90,27 @@ const ProfileSection = ({ username }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [activeView, setActiveView] = useState("overview");
+  const followSyncTimerRef = useRef(null);
+  const followRequestIdRef = useRef(0);
+  const serverFollowingRef = useRef(false);
+  const desiredFollowingRef = useRef(false);
+  const followUsernameRef = useRef("");
 
   const isOwnProfile = profile?.id && user?.id === profile.id;
+
+  const applyFollowerDelta = (nextFollowing, previousFollowing) => {
+    if (nextFollowing === previousFollowing) return;
+
+    setStats((prev) => {
+      if (!prev) return prev;
+
+      const delta = nextFollowing ? 1 : -1;
+      return {
+        ...prev,
+        followersCount: Math.max((prev.followersCount || 0) + delta, 0),
+      };
+    });
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -108,7 +127,11 @@ const ProfileSection = ({ username }) => {
         if (!isMounted) return;
 
         setProfile(profileData.profile);
-        setIsFollowing(!!profileData.isFollowing);
+        const nextFollowing = !!profileData.isFollowing;
+        setIsFollowing(nextFollowing);
+        serverFollowingRef.current = nextFollowing;
+        desiredFollowingRef.current = nextFollowing;
+        followUsernameRef.current = profileData.profile?.username || username;
 
         const [nextStats, nextTopPicks, nextLists] = await Promise.all([
           getProfileStats(username),
@@ -133,30 +156,61 @@ const ProfileSection = ({ username }) => {
 
     return () => {
       isMounted = false;
+      window.clearTimeout(followSyncTimerRef.current);
     };
   }, [username]);
 
-  const handleFollowToggle = async () => {
-    if (!profile?.username) return;
+  const syncFollowState = async () => {
+    const usernameToSync = followUsernameRef.current;
+    if (!usernameToSync) return;
+
+    const targetFollowing = desiredFollowingRef.current;
+    if (targetFollowing === serverFollowingRef.current) return;
+
+    const requestId = followRequestIdRef.current + 1;
+    followRequestIdRef.current = requestId;
+
     try {
-      if (isFollowing) {
-        await unfollowProfile(profile.username);
-        setIsFollowing(false);
-        setStats((prev) =>
-          prev
-            ? { ...prev, followersCount: Math.max(prev.followersCount - 1, 0) }
-            : prev,
-        );
-      } else {
-        await followProfile(profile.username);
-        setIsFollowing(true);
-        setStats((prev) =>
-          prev ? { ...prev, followersCount: prev.followersCount + 1 } : prev,
-        );
+      const result = targetFollowing
+        ? await followProfile(usernameToSync)
+        : await unfollowProfile(usernameToSync);
+      if (requestId !== followRequestIdRef.current) return;
+
+      const confirmedFollowing =
+        typeof result?.following === "boolean"
+          ? result.following
+          : targetFollowing;
+      serverFollowingRef.current = confirmedFollowing;
+
+      if (desiredFollowingRef.current !== confirmedFollowing) {
+        followSyncTimerRef.current = window.setTimeout(syncFollowState, 1000);
       }
     } catch (err) {
+      if (requestId !== followRequestIdRef.current) return;
+
+      const confirmedFollowing = serverFollowingRef.current;
+      const optimisticFollowing = desiredFollowingRef.current;
+      desiredFollowingRef.current = confirmedFollowing;
+      setIsFollowing(confirmedFollowing);
+      applyFollowerDelta(confirmedFollowing, optimisticFollowing);
       setError(err?.message || "Failed to update follow status");
     }
+  };
+
+  const handleFollowToggle = async () => {
+    if (!profile?.username) return;
+
+    const previousFollowing = desiredFollowingRef.current;
+    const nextFollowing = !previousFollowing;
+
+    setError(null);
+    desiredFollowingRef.current = nextFollowing;
+    followUsernameRef.current = profile.username;
+    setIsFollowing(nextFollowing);
+    applyFollowerDelta(nextFollowing, previousFollowing);
+
+    window.clearTimeout(followSyncTimerRef.current);
+    followSyncTimerRef.current = window.setTimeout(syncFollowState, 1000);
   };
 
   const handleSaveProfile = async ({ username, full_name, avatarDataUrl }) => {

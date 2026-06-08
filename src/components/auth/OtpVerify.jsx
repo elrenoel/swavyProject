@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../../services/api";
+import LoadingSpinner from "./LoadingSpinner";
 
 const OtpVerify = () => {
   const [token, setToken] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(60);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,9 +23,24 @@ const OtpVerify = () => {
     setEmail(savedEmail);
   }, [navigate]);
 
+  useEffect(() => {
+    if (resendCooldown <= 0) return undefined;
+
+    const timer = window.setTimeout(() => {
+      setResendCooldown((current) => current - 1);
+    }, 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [resendCooldown]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     setErrorMessage("");
+    setSuccessMessage("");
+    setIsSubmitting(true);
+    let verificationSucceeded = false;
 
     try {
       await apiFetch("/auth/verify-otp", {
@@ -27,9 +48,43 @@ const OtpVerify = () => {
         body: JSON.stringify({ email, token }),
       });
       sessionStorage.removeItem("pendingOtpEmail");
-      navigate("../login");
+      verificationSucceeded = true;
+      setIsRedirecting(true);
+      setSuccessMessage("Verifikasi berhasil. Mengarahkan ke halaman login...");
+      window.setTimeout(() => {
+        navigate("../login");
+      }, 1200);
     } catch (error) {
       setErrorMessage(error?.message || "Verifikasi gagal, coba lagi.");
+    } finally {
+      if (!verificationSucceeded) {
+        setIsSubmitting(false);
+      }
+    }
+  };
+
+  const handleResend = async () => {
+    if (!email || isResending || resendCooldown > 0) return;
+
+    setErrorMessage("");
+    setSuccessMessage("");
+    setIsResending(true);
+
+    try {
+      await apiFetch("/auth/resend-otp", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+      setSuccessMessage("Kode baru sudah dikirim. Cek inbox atau folder spam.");
+      setResendCooldown(60);
+    } catch (error) {
+      setErrorMessage(
+        error?.status === 429
+          ? "Terlalu banyak permintaan email. Silakan coba lagi nanti."
+          : error?.message || "Gagal mengirim ulang kode.",
+      );
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -43,6 +98,12 @@ const OtpVerify = () => {
           Masukkan kode 6 digit yang dikirim ke {email}
         </p>
 
+        {successMessage ? (
+          <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-center text-sm text-green-700">
+            {successMessage}
+          </div>
+        ) : null}
+
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">
@@ -54,6 +115,7 @@ const OtpVerify = () => {
               pattern="[0-9]*"
               maxLength={6}
               value={token}
+              disabled={isSubmitting || isRedirecting}
               onChange={(e) => {
                 const value = e.target.value.replace(/\D/g, "");
                 setToken(value);
@@ -75,11 +137,29 @@ const OtpVerify = () => {
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-[#1DB954] py-3 font-semibold text-white transition duration-200 hover:bg-[#1DB345] active:scale-95"
+            disabled={isSubmitting || isRedirecting}
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#1DB954] py-3 font-semibold text-white transition duration-200 hover:bg-[#1DB345] active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            Verifikasi
+            {isRedirecting || isSubmitting ? <LoadingSpinner /> : "Verifikasi"}
           </button>
         </form>
+
+        <button
+          type="button"
+          onClick={handleResend}
+          disabled={isRedirecting || isResending || resendCooldown > 0}
+          className="mt-4 w-full text-sm font-semibold text-[#1DB954] hover:underline disabled:cursor-not-allowed disabled:text-gray-400 disabled:no-underline"
+        >
+          {isResending ? (
+            <span className="inline-flex items-center justify-center gap-2">
+              <LoadingSpinner className="h-4 w-4 border-[#1DB954]" />
+            </span>
+          ) : resendCooldown > 0 ? (
+            `Kirim ulang kode dalam ${resendCooldown}s`
+          ) : (
+            "Kirim ulang kode"
+          )}
+        </button>
       </div>
     </div>
   );

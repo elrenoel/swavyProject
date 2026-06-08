@@ -33,7 +33,25 @@ export const register = async (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error("Register failed:", {
+      message: error.message,
+      status: error.status,
+      code: error.code,
+      name: error.name,
+    });
+
+    const errorMessage = error.message?.toLowerCase() || "";
+    const isRateLimited = errorMessage.includes("rate limit");
+    const isEmailSendError = errorMessage.includes("sending confirmation email");
+    const status = isRateLimited ? 429 : isEmailSendError ? 502 : error.status || 400;
+
+    res.status(status).json({
+      error: isRateLimited
+        ? "Terlalu banyak permintaan email. Silakan coba lagi nanti."
+        : isEmailSendError
+          ? "Gagal mengirim email OTP. Periksa konfigurasi SMTP Supabase."
+          : error.message,
+    });
   }
 };
 
@@ -134,7 +152,8 @@ export const logout = async (req, res) => {
 export const verifyOTP = async (req, res) => {
   try {
     // Ambil data dari body request
-    const { email, token } = req.body;
+    const email = String(req.body.email || "").trim();
+    const token = String(req.body.token || "").trim();
 
     // Validasi input dasar sebelum ke service
     if (!email || !token) {
@@ -153,9 +172,16 @@ export const verifyOTP = async (req, res) => {
       data: result,
     });
   } catch (error) {
+    const isOtpError =
+      error.status === 403 ||
+      error.message?.toLowerCase().includes("token") ||
+      error.message?.toLowerCase().includes("otp");
+
     return res.status(error.status || 400).json({
       status: "error",
-      message: error.message,
+      message: isOtpError
+        ? "Kode OTP tidak valid atau sudah kedaluwarsa. Coba cek ulang kode terbaru di email."
+        : error.message,
     });
   }
 };

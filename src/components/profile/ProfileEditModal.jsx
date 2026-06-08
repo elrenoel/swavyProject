@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
 
+const DEFAULT_AVATAR_URL = "/placeholder.jpg";
+
 const readFileAsDataUrl = (file) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -131,7 +133,8 @@ const ProfileEditModal = ({ profile, onClose, onSave }) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex items-center gap-4">
             <img
-              src={previewUrl || "https://i.pravatar.cc/120"}
+              src={previewUrl || DEFAULT_AVATAR_URL}
+              alt="Profile avatar preview"
               className="h-16 w-16 rounded-full object-cover"
             />
             <div>

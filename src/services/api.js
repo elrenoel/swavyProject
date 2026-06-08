@@ -61,7 +61,10 @@ export const apiFetch = async (path, options = {}) => {
       typeof data === "object" && data && (data.message || data.error)
         ? data.message || data.error
         : `Request failed with status ${response.status}`;
-    throw new Error(message);
+    const error = new Error(message);
+    error.status = response.status;
+    error.data = data;
+    throw error;
   }
 
   return data;
